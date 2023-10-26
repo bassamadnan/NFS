@@ -28,31 +28,32 @@ void * readfile(int * x)
 {
     int client_socket = *x;
     free(x);
-    char buffer[1024];
-    size_t bytes_read;
-    int msg_size = 0;
-    char actualpath[4086];
-    while((bytes_read = read(client_socket, buffer + msg_size, sizeof(buffer) - msg_size - 1)) > 0)
+    
+    while(1)
     {
-        msg_size += bytes_read;
-        if(msg_size > 1024 -1 || buffer[msg_size - 1] == '\0') break;
+        char buffer[1024];
+        size_t bytes_read;
+        int msg_size = 0;
+        char actualpath[4086];
+        while((bytes_read = read(client_socket, buffer + msg_size, sizeof(buffer) - msg_size - 1)) > 0)
+        {
+            msg_size += bytes_read;
+            if(msg_size > 1024 -1 || buffer[msg_size - 1] == '\0') break;
+        }
+        buffer[msg_size - 1] = '\0';
+        printf("REQUEST: %s from %d\n", buffer, client_socket);
+        fflush(stdout);
+        FILE *fp = fopen(buffer, "r");
+        // read contents of file and send them to client
+        while((bytes_read = fread(buffer, 1 , 1024, fp)) > 0)
+        {
+            write(client_socket, buffer, bytes_read);
+        }
+        fclose(fp);
+        memset(buffer, '\0', sizeof(buffer));
     }
-    buffer[msg_size - 1] = '\0';
-    printf("REQUEST: %s\n", buffer);
-    fflush(stdout);
-    // if(realpath(buffer, actualpath) == NULL)
-    // {
-    //     printf("EXIT");
-    //     exit(1);
-    // }
-    FILE *fp = fopen(buffer, "r");
-    // read contents of file and send them to client
-    while((bytes_read = fread(buffer, 1 , 1024, fp)) > 0)
-    {
-        write(client_socket, buffer, bytes_read);
-    }
+    
     close(client_socket);
-    fclose(fp);
 }
 
 int main()

@@ -1,5 +1,5 @@
-/*File related functions*/
 #include "../inc/entry.h"
+/*File related functions*/
 
 
 str getBaseName(str filename) { // chatgpt
