@@ -8,3 +8,6 @@
 /search.c
 /generate.c
 /info.c
+/a/b.txt
+/a/a.txt
+/a/a.txt/b
