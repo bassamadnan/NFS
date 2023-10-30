@@ -16,7 +16,7 @@ void* clienthread()
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET;
     server_address.sin_addr.s_addr = INADDR_ANY;
-    server_address.sin_port = htons(5050);
+    server_address.sin_port = htons(6060);
     int connection_status;
     // Initiate a socket connection
     if(connection(&network_socket, &server_address, &connection_status))

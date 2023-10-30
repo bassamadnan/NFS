@@ -24,7 +24,7 @@
 #define SERVERS 63
 pthread_t tid[60];
 
-void * readfile(int * x)
+void * client_function(int * x)
 {
     int client_socket = *x;
     free(x);
@@ -56,14 +56,8 @@ void * readfile(int * x)
     close(client_socket);
 }
 
-int main()
+void * client_thread(void * args)
 {
-
-    // initialize servers
-    for(int i=0; i<SERVERS; i++)
-    {
-
-    }
     int serverSocket, newSocket;
     struct sockaddr_in serverAddr;
     struct sockaddr_storage serverStorage;
@@ -72,10 +66,8 @@ int main()
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     serverAddr.sin_addr.s_addr = INADDR_ANY;
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(8989);
+    serverAddr.sin_port = htons(5050);
  
-    // Bind the socket to the
-    // address and port number.
     bind(serverSocket,
          (struct sockaddr*)&serverAddr,
          sizeof(serverAddr));
@@ -99,9 +91,57 @@ int main()
         pthread_t t;
         int *arg = malloc(sizeof(int));
         *arg = newSocket;
-        pthread_create(&t, NULL, readfile, arg);
+        printf("New Client: %d\n", newSocket);
+        pthread_create(&t, NULL, client_function, arg);
 
     }
+}
 
+void * server_thread(void * args)
+{
+    int serverSocket, newSocket;
+    struct sockaddr_in serverAddr;
+    struct sockaddr_storage serverStorage;
+ 
+    socklen_t addr_size;
+    serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    serverAddr.sin_addr.s_addr = INADDR_ANY;
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(6060);
+ 
+    bind(serverSocket,
+         (struct sockaddr*)&serverAddr,
+         sizeof(serverAddr));
+ 
+
+    if (listen(serverSocket, 50) == 0)
+        printf("Listening\n");
+    else
+        printf("Error\n");
+ 
+    
+    while(true)
+    {
+
+        addr_size = sizeof(serverAddr);
+
+        newSocket = accept(serverSocket,
+                           (struct sockaddr*)&serverStorage,
+                           &addr_size);
+
+        pthread_t t;
+        int *arg = malloc(sizeof(int));
+        *arg = newSocket;
+        printf("New server: %d \n", newSocket);
+        pthread_create(&t, NULL, client_function, arg);
+
+    }
+}
+int main()
+{
+    pthread_t cth, sth;
+    pthread_create(&cth, NULL, client_thread, NULL);
+    pthread_create(&sth, NULL, server_thread, NULL);
+    pthread_join(&cth, NULL);
     return 0;
 }
