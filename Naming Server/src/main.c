@@ -1,27 +1,5 @@
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <grp.h> // for group
-#include <pwd.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/types.h>  
-#include <sys/utsname.h>
-#include <sys/wait.h> // wuncrate
-#include <time.h>
-#include <time.h>
-#include <unistd.h>
-#include<stdio.h>
-#include <arpa/inet.h>
-#include <pthread.h>
+#include "../inc/cmds.h"
 
-#define SERVERS 63
 pthread_t tid[60];
 
 void * client_function(int * x)
@@ -51,6 +29,21 @@ void * client_function(int * x)
         }
         fclose(fp);
         memset(buffer, '\0', sizeof(buffer));
+    }
+    
+    close(client_socket);
+}
+
+void * server_function(int * x)
+{
+    int client_socket = *x;
+    free(x);
+    entry e;
+    read(client_socket, &e, sizeof(e));
+    int i = 0;
+    while(i<e.entries)
+    {
+        printf("%s\n", e.paths[i++]);
     }
     
     close(client_socket);
@@ -133,7 +126,7 @@ void * server_thread(void * args)
         int *arg = malloc(sizeof(int));
         *arg = newSocket;
         printf("New server: %d \n", newSocket);
-        pthread_create(&t, NULL, client_function, arg);
+        pthread_create(&t, NULL, server_function, arg);
 
     }
 }
@@ -142,6 +135,7 @@ int main()
     pthread_t cth, sth;
     pthread_create(&cth, NULL, client_thread, NULL);
     pthread_create(&sth, NULL, server_thread, NULL);
-    pthread_join(&cth, NULL);
+    pthread_join(cth, NULL);
+    pthread_join(sth, NULL);
     return 0;
 }

@@ -29,7 +29,7 @@ void* clienthread()
         char client_request[1000];
         printf("Enter txt filename: ");
         scanf("%s", client_request);
-        client_request[strlen(client_request) - -1] = '\0';
+        client_request[strlen(client_request)] = '\0';
         msgsend(&network_socket, client_request);
         char reply[4096];
         recv(network_socket, reply, sizeof(reply), 0);

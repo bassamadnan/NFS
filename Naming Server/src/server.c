@@ -1,15 +1,25 @@
 #include "../inc/cmds.h"
 
-
-void* clienthread()
+void access_path(entry * e)
 {
- 
-    // int client_request = *((int*)args);
-    // scanf("%d", &1);
-    // char client_request[] = "a.txt";
+
+    FILE* fp = fopen("generate.txt", "r");
+    int i = 0;   
+    if (fp == NULL) {
+        perror("Error opening the file");
+        return;
+    }
+
+    char line[256]; // Assumes each line is not longer than 255 characters
+    while (fgets(line, sizeof(line), fp) != NULL) {
+        strcpy((*e).paths[i++], line);
+    }
+    (*e).entries = i;
+    fclose(fp);
+}
+void* server_thread()
+{
     int network_socket;
- 
-    // Create a stream socket
     network_socket = socket(AF_INET, SOCK_STREAM, 0);
  
     // Initialise port number and address
@@ -18,32 +28,35 @@ void* clienthread()
     server_address.sin_addr.s_addr = INADDR_ANY;
     server_address.sin_port = htons(6060);
     int connection_status;
-    // Initiate a socket connection
     if(connection(&network_socket, &server_address, &connection_status))
     {
         printf("Error in connection\n"); return 0;
     }
-
-    while(1)
-    {
-        char client_request[1000];
-        printf("Enter txt filename: ");
-        scanf("%s", client_request);
-        client_request[strlen(client_request) - -1] = '\0';
-        msgsend(&network_socket, client_request);
-        char reply[4096];
-        recv(network_socket, reply, sizeof(reply), 0);
-        printf("%s\n", reply);
-        fflush(stdout);
-
-    }
+    entry e;
+    e.cport = 52;
+    strcpy(e.ip, "0000.0000.0000");
+    e.nmport = 55;
+    access_path(&e);
+    int i =0;
+    while(i<e.entries) printf("%s", e.paths[i++]);
+    send(network_socket, &e, sizeof(e), 0);
     close(network_socket);
  
 }
 
+void init()
+{   
+    // initialize a connection to the NM (NM listens at port 6060 for SS)
+    // read all paths from generate.txt, send it to NM
+
+    return;
+}
+
 int main()
 {
-    clienthread();
+    // every server will have one thread for handling connection with NM,
+    // every server will have one thread for handling connectionS with clients
+    server_thread();
     // while(1)
     // {
 

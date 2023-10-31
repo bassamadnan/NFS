@@ -23,7 +23,22 @@ Shortcuts of commands used
 #include<stdio.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#define IP_SIZE     16
+#define MAX_PATH_SIZE 4096
+#define MAX_NAME_SIZE   1024
+#define MAX_ENTRIES     1024
+#define str     char*
+#define str_arr char**
 
+typedef struct entry
+{
+    int id;
+    char ip[IP_SIZE];
+    int nmport;
+    int cport;
+    int entries;
+    char paths[MAX_ENTRIES][MAX_PATH_SIZE];
+}entry;
 
 // connection(&network_socket, &server_address, &connection_status)
 int connection(int* socket, struct sockaddr_in * addr, int *stat)
