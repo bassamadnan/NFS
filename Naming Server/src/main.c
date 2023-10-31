@@ -41,9 +41,10 @@ void * server_function(int * x)
     entry e;
     read(client_socket, &e, sizeof(e));
     int i = 0;
+    printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s\n", e.id, e.entries, e.cport, e.nmport, e.ip);
     while(i<e.entries)
     {
-        printf("%s\n", e.paths[i++]);
+        printf("%s", e.paths[i++]);
     }
     
     close(client_socket);
@@ -59,28 +60,20 @@ void * client_thread(void * args)
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     serverAddr.sin_addr.s_addr = INADDR_ANY;
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(5050);
+    serverAddr.sin_port = htons(NM_CLIENT_PORT);
  
-    bind(serverSocket,
-         (struct sockaddr*)&serverAddr,
-         sizeof(serverAddr));
+    bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
  
-
     if (listen(serverSocket, 50) == 0)
         printf("Listening\n");
     else
         printf("Error\n");
- 
     
-    while(true)
+    while(1)
     {
 
         addr_size = sizeof(serverAddr);
-
-        newSocket = accept(serverSocket,
-                           (struct sockaddr*)&serverStorage,
-                           &addr_size);
-
+        newSocket = accept(serverSocket, (struct sockaddr*)&serverStorage, &addr_size);
         pthread_t t;
         int *arg = malloc(sizeof(int));
         *arg = newSocket;
@@ -100,12 +93,8 @@ void * server_thread(void * args)
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     serverAddr.sin_addr.s_addr = INADDR_ANY;
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(6060);
- 
-    bind(serverSocket,
-         (struct sockaddr*)&serverAddr,
-         sizeof(serverAddr));
- 
+    serverAddr.sin_port = htons(NM_SERVER_PORT);
+    bind(serverSocket,(struct sockaddr*)&serverAddr, sizeof(serverAddr));
 
     if (listen(serverSocket, 50) == 0)
         printf("Listening\n");
@@ -113,22 +102,17 @@ void * server_thread(void * args)
         printf("Error\n");
  
     
-    while(true)
+    while(1)
     {
-
         addr_size = sizeof(serverAddr);
-
-        newSocket = accept(serverSocket,
-                           (struct sockaddr*)&serverStorage,
-                           &addr_size);
-
+        newSocket = accept(serverSocket,(struct sockaddr*)&serverStorage,&addr_size);
         pthread_t t;
         int *arg = malloc(sizeof(int));
         *arg = newSocket;
         printf("New server: %d \n", newSocket);
         pthread_create(&t, NULL, server_function, arg);
-
     }
+
 }
 int main()
 {

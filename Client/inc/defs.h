@@ -23,12 +23,13 @@
 
 #define str char*
 #define str_arr char**
-
+#define MAX_INPUT_SIZE 5000 
+#define MAX_WORDS   512
 typedef struct command
 {
     int argc;
-    str cmd;
-    str_arr argv;
+    char cmd[MAX_INPUT_SIZE];
+    char cmd[MAX_WORDS][MAX_INPUT_SIZE];
 }command;
 
 void parser(str input)
@@ -37,4 +38,5 @@ void parser(str input)
     // command operation -> argv[0] (read xyz/ delete xyz / write xyz)
     // based on argv[0] , use the API for the operation 
     // throw errors !
+    
 }

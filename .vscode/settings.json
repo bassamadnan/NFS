@@ -2,6 +2,7 @@
     "files.associations": {
         "entry.h": "c",
         "stdio.h": "c",
-        "functional": "c"
+        "functional": "c",
+        "cmds.h": "c"
     }
 }

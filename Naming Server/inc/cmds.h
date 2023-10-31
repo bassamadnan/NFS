@@ -23,12 +23,19 @@ Shortcuts of commands used
 #include<stdio.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+
+
 #define IP_SIZE     16
 #define MAX_PATH_SIZE 4096
 #define MAX_NAME_SIZE   1024
 #define MAX_ENTRIES     1024
 #define str     char*
 #define str_arr char**
+#define PARAMS(x) sizeof(x), 0
+#define NM_CLIENT_PORT  5050 // clients send connecting request to 5050 port
+#define NM_SERVER_PORT  6060 // SS send connecting request on 6060 port 
+#define MAX_INPUT_SIZE 5000 
+#define MAX_WORDS   512
 
 typedef struct entry
 {
@@ -38,8 +45,34 @@ typedef struct entry
     int cport;
     int entries;
     char paths[MAX_ENTRIES][MAX_PATH_SIZE];
+    char init_path[MAX_PATH_SIZE];
 }entry;
 
+typedef struct command
+{
+    int argc;
+    char cmd[MAX_INPUT_SIZE];
+    char argv[MAX_WORDS][MAX_INPUT_SIZE];
+}command;
+
+command parser()
+{
+    char input[MAX_INPUT_SIZE];
+    fgets(input, MAX_INPUT_SIZE, stdin);
+    command cmd;
+    char del[] = " \t\n\v\r\f";
+    int n = strlen(input), i = 0;
+    strcpy(cmd.cmd, input);
+    cmd.cmd[n] = '\0';
+    str token = strtok(input, del);
+    while(token)
+    {
+        strcpy(cmd.argv[i++], token);
+        token = strtok(NULL, del);
+    }
+    cmd.argc = i;
+    return cmd;
+}
 // connection(&network_socket, &server_address, &connection_status)
 int connection(int* socket, struct sockaddr_in * addr, int *stat)
 {
