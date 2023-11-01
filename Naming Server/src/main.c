@@ -1,7 +1,7 @@
 #include "../inc/cmds.h"
 
 pthread_t tid[60];
-
+entry entries[MAX_ENTRIES];
 void * client_function(int * x)
 {
     int client_socket = *x;
@@ -9,31 +9,37 @@ void * client_function(int * x)
     
     while(1)
     {
-        char buffer[1024];
-        size_t bytes_read;
-        int msg_size = 0;
-        char actualpath[4086];
-        while((bytes_read = read(client_socket, buffer + msg_size, sizeof(buffer) - msg_size - 1)) > 0)
+        command c;
+        read(client_socket, &c, sizeof(c));
+        int argc = c.argc;
+        char path[MAX_PATH_SIZE];
+        strcpy(path, c.argv[argc - 1]);
+        int ss = -1;
+        printf("Client %d requested for %s \n", client_socket, path);
+        for(int i=0; i < MAX_ENTRIES; i++)
         {
-            msg_size += bytes_read;
-            if(msg_size > 1024 -1 || buffer[msg_size - 1] == '\0') break;
+            int id = 0;
+            while(id < entries[i].entries)
+            {
+                if(strcmp(path, entries[i].paths[id]) == 0)
+                {
+                    ss = i;
+                    break;
+                }
+                id++;
+            }
         }
-        buffer[msg_size - 1] = '\0';
-        printf("REQUEST: %s from %d\n", buffer, client_socket);
-        fflush(stdout);
-        FILE *fp = fopen(buffer, "r");
-        // read contents of file and send them to client
-        while((bytes_read = fread(buffer, 1 , 1024, fp)) > 0)
+        if(ss != -1)
         {
-            write(client_socket, buffer, bytes_read);
+            printf("Found in ID: %d, listening on port %d, ip: %s\n", entries[ss].id, entries[ss].cport, entries[ss].ip);
         }
-        fclose(fp);
-        memset(buffer, '\0', sizeof(buffer));
+        else{
+            printf("Not found\n");
+        }
+
     }
-    
     close(client_socket);
 }
-
 void * server_function(int * x)
 {
     int client_socket = *x;
@@ -46,7 +52,7 @@ void * server_function(int * x)
     {
         printf("%s", e.paths[i++]);
     }
-    
+    entries[e.id] = e;
     close(client_socket);
 }
 

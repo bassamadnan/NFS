@@ -13,6 +13,7 @@ void access_path(entry * e)
     char line[MAX_PATH_SIZE]; 
     while (fgets(line, sizeof(line), fp) != NULL) {
         strcpy((*e).paths[i++], line);
+        (*e).paths[i-1][strlen((*e).paths[i-1])] = '\0'; // remove newline 
     }
     (*e).entries = i;
     fclose(fp);
@@ -29,7 +30,7 @@ void server_entry(int id, int cport, str init_path)
     int connection_status;
     if(connection(&network_socket, &server_address, &connection_status))
     {
-        printf("Error in connection\n"); return 0;
+        printf("Error in connection\n"); return;
     }
     entry e;
     e.id = id;
@@ -38,7 +39,7 @@ void server_entry(int id, int cport, str init_path)
     strcpy(e.ip, "000.000.010.000");
     e.nmport = NM_SERVER_PORT;  // communication to the NM via the 6060 port
     access_path(&e);  // read all paths from generate.txt, send it to NM
-    send(network_socket, &e, PARAMS(e));
+    send(network_socket, PARAMS(e));
     close(network_socket); 
 }
 
@@ -94,6 +95,6 @@ int main()
     
     server_entry(id, port, path);
     pthread_t clnt;
-    pthread(&clnt, 0, init_server, &port);
+    pthread_create(&clnt, 0, init_server, &port);
     return 0;
 }

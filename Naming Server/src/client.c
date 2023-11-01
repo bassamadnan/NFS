@@ -16,15 +16,8 @@ void* clienthread()
     }
     while(1)
     {
-        char client_request[1000];
-        printf("Enter txt filename: ");
-        scanf("%s", client_request);
-        client_request[strlen(client_request)] = '\0';
-        send(network_socket, client_request, PARAMS(client_request));
-        char reply[4096];
-        recv(network_socket, reply, PARAMS(reply));
-        printf("%s\n", reply);
-        fflush(stdout);
+        command c = parser();
+        send(network_socket, PARAMS(c));
 
     }
     close(network_socket);

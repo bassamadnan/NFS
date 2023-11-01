@@ -31,7 +31,7 @@ Shortcuts of commands used
 #define MAX_ENTRIES     1024
 #define str     char*
 #define str_arr char**
-#define PARAMS(x) sizeof(x), 0
+#define PARAMS(x) &x, sizeof(x), 0
 #define NM_CLIENT_PORT  5050 // clients send connecting request to 5050 port
 #define NM_SERVER_PORT  6060 // SS send connecting request on 6060 port 
 #define MAX_INPUT_SIZE 5000 
