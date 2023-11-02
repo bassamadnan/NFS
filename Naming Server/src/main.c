@@ -13,13 +13,15 @@ void * client_function(int * x)
     for(;;)
     {
         command c;
-        recv(client_socket, PARAMS(c));
-        printf("REcieved\n");
+        recv(client_socket, PARAMS(c));        
         int argc = c.argc;
         char path[MAX_PATH_SIZE];
-        strcpy(path, c.argv[argc - 1]);
+        strcpy(path, c.argv[argc - 1]);              
+        if (!(strlen(path) == 0)) {        
+        	printf("Recieved\n");
+        }
         int ss = -1;
-        for(int i=0; i < MAX_ENTRIES; i++)
+        for(int i=0; i < MAX_ENTRIES && !(strlen(path) == 0) && !(strlen(path) == 1); i++)
         {
             int id = 0;
             while(id < entries[i].entries)
@@ -40,9 +42,21 @@ void * client_function(int * x)
             e = entries[ss];
         }
         else{
-            printf("Client %d requested for %s in %d\n", client_socket, path, syscall(SYS_gettid));
-            e.id = -1;
-            printf("Not found\n");
+        		if (!(strlen(path) == 0)) {
+	            printf("Client %d requested for the following string in thread %d:\n", client_socket, syscall(SYS_gettid));
+							printf("String: %s\n", path);
+							int charCount = 0;
+							
+							for (int i = 0; path[i] != '\0'; i++) {
+							    printf("Character '%c': ASCII value %d\n", path[i], (int)path[i]);
+							    charCount++;
+							}
+							
+							printf("Total character count: %d\n", charCount);
+	
+	            e.id = -1;
+	            printf("Not found\n");
+	          }
         }
         // send(client_socket, PARAMS(e));
 
