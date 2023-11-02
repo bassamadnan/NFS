@@ -4,6 +4,7 @@
         "stdio.h": "c",
         "functional": "c",
         "cmds.h": "c",
-        "types.h": "c"
+        "types.h": "c",
+        "fileapi.h": "c"
     }
 }

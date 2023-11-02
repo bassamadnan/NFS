@@ -1,14 +1,12 @@
 #include "../inc/cmds.h"
+#include "../inc/fileapi.h"
+#include "../inc/lru.h"
 
 int main()
 {
-    command c = parser();
-    printf("argc: %d ,len: %d,  cmd: %s", c.argc, strlen(c.cmd), c.cmd);
-    int i =0;
-    while(i<c.argc)
-    {
-        printf("arg %d = %s\n", i, c.argv[i]);
-        i++;
-    }
+    str buffer = NULL; str filename = "a.txt";
+    size_t filesize;
+    readFile(filename, &buffer ,&filesize);
+    printf("%d\n%s", filesize, buffer);
     return 0;
 }

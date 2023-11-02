@@ -1,3 +1,5 @@
+#ifndef CMDS
+#define CMDS
 /*
 Shortcuts of commands used
 */
@@ -55,23 +57,21 @@ typedef struct command
     char argv[MAX_WORDS][MAX_INPUT_SIZE];
 }command;
 
-command parser()
+void parser(command *cmd)
 {
     char input[MAX_INPUT_SIZE];
     fgets(input, MAX_INPUT_SIZE, stdin);
-    command cmd;
     char del[] = " \t\n\v\r\f";
     int n = strlen(input), i = 0;
-    strcpy(cmd.cmd, input);
-    cmd.cmd[n] = '\0';
+    strcpy(cmd->cmd, input);
+    cmd->cmd[n] = '\0';
     str token = strtok(input, del);
     while(token)
     {
-        strcpy(cmd.argv[i++], token);
+        strcpy(cmd->argv[i++], token);
         token = strtok(NULL, del);
     }
-    cmd.argc = i;
-    return cmd;
+    cmd->argc = i;
 }
 // connection(&network_socket, &server_address, &connection_status)
 int connection(int* socket, struct sockaddr_in * addr, int *stat)
@@ -92,3 +92,5 @@ int recvreply(int * network_socket, char *reply)
     ssize_t bytes_recved = recv(*network_socket, reply, sizeof(reply), 0);
     return bytes_recved == -1 ? 1:0;
 }
+
+#endif

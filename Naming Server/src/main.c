@@ -70,7 +70,7 @@ void server_function(int * x)
     entry e;
     recv(client_socket, PARAMS(e));
     int i = 0;
-    printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s from thread: 1\n", e.id, e.entries, e.cport, e.nmport, e.ip);
+    printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s from thread: %d\n", e.id, e.entries, e.cport, e.nmport, e.ip, client_socket);
     while(i<e.entries)
     {
         printf("%s\n", e.paths[i++]);
