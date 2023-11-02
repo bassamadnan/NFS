@@ -1,4 +1,7 @@
 #include "../inc/cmds.h"
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/syscall.h>
 
 pthread_t tid[60];
 entry entries[MAX_ENTRIES];
@@ -7,20 +10,21 @@ void * client_function(int * x)
     int client_socket = *x;
     free(x);
     
-    while(1)
+    for(;;)
     {
         command c;
-        read(client_socket, &c, sizeof(c));
+        recv(client_socket, PARAMS(c));
+        printf("REcieved\n");
         int argc = c.argc;
         char path[MAX_PATH_SIZE];
         strcpy(path, c.argv[argc - 1]);
         int ss = -1;
-        printf("Client %d requested for %s \n", client_socket, path);
         for(int i=0; i < MAX_ENTRIES; i++)
         {
             int id = 0;
             while(id < entries[i].entries)
             {
+                printf("Compared %s with %s\n",path, entries[i].paths[id]);
                 if(strcmp(path, entries[i].paths[id]) == 0)
                 {
                     ss = i;
@@ -29,28 +33,33 @@ void * client_function(int * x)
                 id++;
             }
         }
+        entry e;
         if(ss != -1)
         {
             printf("Found in ID: %d, listening on port %d, ip: %s\n", entries[ss].id, entries[ss].cport, entries[ss].ip);
+            e = entries[ss];
         }
         else{
+            printf("Client %d requested for %s in %d\n", client_socket, path, syscall(SYS_gettid));
+            e.id = -1;
             printf("Not found\n");
         }
+        // send(client_socket, PARAMS(e));
 
     }
     close(client_socket);
 }
-void * server_function(int * x)
+void server_function(int * x)
 {
     int client_socket = *x;
     free(x);
     entry e;
-    read(client_socket, &e, sizeof(e));
+    recv(client_socket, PARAMS(e));
     int i = 0;
-    printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s\n", e.id, e.entries, e.cport, e.nmport, e.ip);
+    printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s from thread: 1\n", e.id, e.entries, e.cport, e.nmport, e.ip);
     while(i<e.entries)
     {
-        printf("%s", e.paths[i++]);
+        printf("%s\n", e.paths[i++]);
     }
     entries[e.id] = e;
     close(client_socket);
@@ -116,7 +125,7 @@ void * server_thread(void * args)
         int *arg = malloc(sizeof(int));
         *arg = newSocket;
         printf("New server: %d \n", newSocket);
-        pthread_create(&t, NULL, server_function, arg);
+        pthread_create(&t, NULL, &server_function, arg);
     }
 
 }

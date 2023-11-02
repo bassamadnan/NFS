@@ -14,10 +14,17 @@ void* clienthread()
     {
         printf("Error in connection\n"); return 0;
     }
-    while(1)
+    for(;;)
     {
         command c = parser();
         send(network_socket, PARAMS(c));
+        sleep(1);
+        // entry e;
+        // recv(network_socket, PARAMS(e));
+        // if(e.id != -1)
+        // printf("Got back SS ID: %d, ss cport: %d , ss ip: %s\n", e.id, e.cport, e.ip);
+        // else
+        // printf("Not found\n");
 
     }
     close(network_socket);

@@ -3,6 +3,7 @@
         "entry.h": "c",
         "stdio.h": "c",
         "functional": "c",
-        "cmds.h": "c"
+        "cmds.h": "c",
+        "types.h": "c"
     }
 }

@@ -13,7 +13,7 @@ void access_path(entry * e)
     char line[MAX_PATH_SIZE]; 
     while (fgets(line, sizeof(line), fp) != NULL) {
         strcpy((*e).paths[i++], line);
-        (*e).paths[i-1][strlen((*e).paths[i-1])] = '\0'; // remove newline 
+        (*e).paths[i-1][strlen((*e).paths[i-1]) - 1] = '\0'; // remove newline 
     }
     (*e).entries = i;
     fclose(fp);
