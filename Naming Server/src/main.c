@@ -5,6 +5,8 @@
 
 pthread_t tid[60];
 entry entries[MAX_ENTRIES];
+
+
 void * client_function(int * x)
 {
     int client_socket = *x;
@@ -13,15 +15,13 @@ void * client_function(int * x)
     for(;;)
     {
         command c;
-        recv(client_socket, PARAMS(c));        
+        recv_command(client_socket, &c);
+        printf("Recieved \n");
         int argc = c.argc;
         char path[MAX_PATH_SIZE];
-        strcpy(path, c.argv[argc - 1]);              
-        if (!(strlen(path) == 0)) {        
-        	printf("Recieved\n");
-        }
+        strcpy(path, c.argv[argc - 1]);
         int ss = -1;
-        for(int i=0; i < MAX_ENTRIES && !(strlen(path) == 0) && !(strlen(path) == 1); i++)
+        for(int i=0; i < MAX_ENTRIES; i++)
         {
             int id = 0;
             while(id < entries[i].entries)
@@ -42,21 +42,9 @@ void * client_function(int * x)
             e = entries[ss];
         }
         else{
-        		if (!(strlen(path) == 0)) {
-	            printf("Client %d requested for the following string in thread %d:\n", client_socket, syscall(SYS_gettid));
-							printf("String: %s\n", path);
-							int charCount = 0;
-							
-							for (int i = 0; path[i] != '\0'; i++) {
-							    printf("Character '%c': ASCII value %d\n", path[i], (int)path[i]);
-							    charCount++;
-							}
-							
-							printf("Total character count: %d\n", charCount);
-	
-	            e.id = -1;
-	            printf("Not found\n");
-	          }
+            printf("Client %d requested for %s in %d\n", client_socket, path, syscall(SYS_gettid));
+            e.id = -1;
+            printf("Not found\n");
         }
         // send(client_socket, PARAMS(e));
 
@@ -68,9 +56,9 @@ void server_function(int * x)
     int client_socket = *x;
     free(x);
     entry e;
-    recv(client_socket, PARAMS(e));
+    recv_entry(client_socket, &e);
     int i = 0;
-    printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s from thread: %d\n", e.id, e.entries, e.cport, e.nmport, e.ip, client_socket);
+    printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s from thread: 1\n", e.id, e.entries, e.cport, e.nmport, e.ip);
     while(i<e.entries)
     {
         printf("%s\n", e.paths[i++]);

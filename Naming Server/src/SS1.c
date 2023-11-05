@@ -19,6 +19,7 @@ void access_path(entry * e)
     fclose(fp);
 }
 
+
 void server_entry(int id, int cport, str init_path)
 {
     int network_socket;
@@ -35,55 +36,17 @@ void server_entry(int id, int cport, str init_path)
     entry e;
     e.id = id;
     e.cport = cport;
-    strcpy(e.init_path, init_path);
     strcpy(e.ip, "000.000.010.000");
     e.nmport = NM_SERVER_PORT;  // communication to the NM via the 6060 port
     access_path(&e);  // read all paths from generate.txt, send it to NM
-    send(network_socket, PARAMS(e));
+    send_entry(network_socket, &e);
     close(network_socket); 
-}
-void *client_handler(int * x)
-{
-    int client_socket = *x;
-    free(x);
-    command c;
-    recv(client_socket, PARAMS(c));
-    printf("%d %s -> %s\n", c.argc, c.cmd, c.argv[0]);
-    close(client_socket);
 }
 
 void handle_client()
 {
     // client gave some command of the form [OPN] [PATH]
     // recieve that command
-    // SS acts as a server here
-    int serverSocket, newSocket;
-    struct sockaddr_in serverAddr;
-    struct sockaddr_storage serverStorage;
- 
-    socklen_t addr_size;
-    serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-    serverAddr.sin_addr.s_addr = INADDR_ANY;
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(6061);
-    bind(serverSocket,(struct sockaddr*)&serverAddr, sizeof(serverAddr));
-
-    if (listen(serverSocket, 50) == 0)
-        printf("Listening\n");
-    else
-        printf("Error\n");
- 
-    
-    while(1)
-    {
-        addr_size = sizeof(serverAddr);
-        newSocket = accept(serverSocket,(struct sockaddr*)&serverStorage,&addr_size);
-        pthread_t t;
-        int *arg = malloc(sizeof(int));
-        *arg = newSocket;
-        printf("New Client: %d \n", newSocket);
-        pthread_create(&t, NULL, &client_handler, arg);
-    }
 }
 
 void * init_server(void * args)
@@ -133,6 +96,5 @@ int main()
     server_entry(id, port, path);
     pthread_t clnt;
     pthread_create(&clnt, 0, init_server, &port);
-    pthread_join(clnt, NULL);
     return 0;
 }
