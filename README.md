@@ -25,3 +25,8 @@ Client input is handeled mainly via the struct of `command` , this is send to th
 **TODO**-  The NM will now look up the last argument using `argc` variable, and check if this `path` is present in its entries or not and return the `ID` of the SS it belongs to. (Handeled in `cthreads.c`) 
 
 **TEMP**- for testing purposes this is set on 0 by default when only one server is active.
+
+## Recieving and Sending
+tldr; had to serialize and deserialize structs :(
+As mentioned earlier, we avoided serializing/deserializing of structs, but this came with problems of their own. Functions `send/recv_entry/command()` have been added for now to deal with the sending and reciving of data. ACK `int(s)` have also been sent perhaps as a temporary palceholder for ACKS in the future (**TODO?**)
+**REMEBMER** - premature free causing socket file descriptor to change. handle later
