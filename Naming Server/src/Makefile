@@ -13,5 +13,5 @@ server: SS1.c
 		$(CC) -o server server.c $(CFLAGS)
 
 clean:
-		rm -f client main SS1
+		rm -f client main SS1 SS2 
 

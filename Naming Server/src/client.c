@@ -1,8 +1,24 @@
 #include "../inc/cmds.h"
 
+entry temp;
 
+void SS_connect(int port, command *c)
+{
+    int network_socket;
+    network_socket = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in server_address;
+    server_address.sin_family = AF_INET;
+    server_address.sin_addr.s_addr = INADDR_ANY;
+    server_address.sin_port = htons(port);
+    int connection_status;
+    if(connection(&network_socket, &server_address, &connection_status))
+    {
+        printf("Error in connection\n"); return;
+    }
+    send_command(network_socket, c);
+}
 
-void* clienthread()
+void *clienthread(void * args)
 {
     int network_socket;
     network_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -15,16 +31,15 @@ void* clienthread()
     {
         printf("Error in connection\n"); return 0;
     }
-    for(;;)
+    while(1)
     {
         command c = parser(network_socket);
         send_command(network_socket, &c);
-        // entry e;
-        // recv(network_socket, PARAMS(e));
-        // if(e.id != -1)
-        // printf("Got back SS ID: %d, ss cport: %d , ss ip: %s\n", e.id, e.cport, e.ip);
-        // else
-        // printf("Not found\n");
+        entry *e = malloc(sizeof(entry)); // free this later !!
+        empty_entry(e);
+        recv_entry(network_socket, e);
+        printf("In port : %d\n", e->cport);
+        SS_connect(e->cport, &c);
 
     }
     close(network_socket);
@@ -33,6 +48,8 @@ void* clienthread()
 
 int main()
 {
-    clienthread();
+    pthread_t c;
+    pthread_create(&c, NULL, clienthread, NULL);
+    pthread_join(c, NULL);
     return 0;
 }

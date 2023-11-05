@@ -19,6 +19,7 @@ void * client_function(int * x)
         printf("Recieved \n");
         int argc = c.argc;
         char path[MAX_PATH_SIZE];
+        memset(path, 0, sizeof(path));
         strcpy(path, c.argv[argc - 1]);
         int ss = -1;
         for(int i=0; i < MAX_ENTRIES; i++)
@@ -26,27 +27,29 @@ void * client_function(int * x)
             int id = 0;
             while(id < entries[i].entries)
             {
-                printf("Compared %s with %s\n",path, entries[i].paths[id]);
+                // printf("Compared %s with %s\n",path, entries[i].paths[id]);
                 if(strcmp(path, entries[i].paths[id]) == 0)
                 {
                     ss = i;
+                    // send_entry(client_socket, &entries[i]);
                     break;
                 }
                 id++;
             }
         }
-        entry e;
+        entry e = EMPTY_ENTRY;
         if(ss != -1)
         {
             printf("Found in ID: %d, listening on port %d, ip: %s\n", entries[ss].id, entries[ss].cport, entries[ss].ip);
             e = entries[ss];
+            // send_entry(client_socket, &entries[ss]);
         }
         else{
             printf("Client %d requested for %s in %d\n", client_socket, path, syscall(SYS_gettid));
-            e.id = -1;
+            // e.id = -1;
             printf("Not found\n");
         }
-        // send(client_socket, PARAMS(e));
+        send_entry(client_socket, &e);
 
     }
     close(client_socket);
@@ -55,15 +58,16 @@ void server_function(int * x)
 {
     int client_socket = *x;
     free(x);
-    entry e;
-    recv_entry(client_socket, &e);
+    entry *e = malloc(sizeof(entry));
+    empty_entry(e);
+    recv_entry(client_socket, e);
     int i = 0;
-    printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s from thread: 1\n", e.id, e.entries, e.cport, e.nmport, e.ip);
-    while(i<e.entries)
+    printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s from thread: 1\n", e->id, e->entries, e->cport, e->nmport, e->ip);
+    while(i<e->entries)
     {
-        printf("%s\n", e.paths[i++]);
+        printf("%s\n", e->paths[i++]);
     }
-    entries[e.id] = e;
+    entries[e->id] = *e;
     close(client_socket);
 }
 

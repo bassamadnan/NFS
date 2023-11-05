@@ -4,7 +4,7 @@
 void access_path(entry * e)
 {
     // fills the e.paths value with the directories in generate.txt
-    FILE* fp = fopen("generate.txt", "r");
+    FILE* fp = fopen("a.txt", "r");
     int i = 0;   
     if (fp == NULL) {
         perror("Error opening the file");
@@ -50,8 +50,7 @@ void * handle_client(void * args)
     int socket = *(int *)args;
     command *c = malloc(sizeof(command));
     recv_command(socket, c);
-    printf("SS1 recieved command from :%d, %s \n", socket, c->cmd);
-
+    printf("SS2 recieved command from :%d, %s \n", socket, c->cmd);
     free(args);
     close(socket);
 }
@@ -96,7 +95,7 @@ int main()
 
 
     /*-----------------------------------------*/
-    int id = 0, port = 6061;
+    int id = 1, port = 6062;
     char path[] = "/home/bassam/Desktop/FP/Storage Server/src";
     /*-----------------------------------------*/
     

@@ -1,3 +1,15 @@
-in bassam
-multiple lines
-for testing this spec
+/files.c
+/testdir
+/testdir/inside
+/testdir/inside/b.txt
+/testdir/a.txt
+/generate
+/generate.txt
+/search.c
+/generate.c
+/info.c
+/a/b.txt
+/a/a.txt
+/yourmom.txt
+/a/a.txt/b
+/a1.txt

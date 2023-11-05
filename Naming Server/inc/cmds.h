@@ -38,6 +38,8 @@ Shortcuts of commands used
 #define MAX_INPUT_SIZE 5000 
 #define MAX_WORDS   512
 
+
+
 typedef struct entry
 {
     int id;
@@ -47,7 +49,7 @@ typedef struct entry
     int entries;
     char paths[MAX_ENTRIES][MAX_PATH_SIZE];
 }entry;
-
+entry EMPTY_ENTRY;
 typedef struct command
 {
     int client;
@@ -59,6 +61,7 @@ typedef struct command
 command parser(int socket)
 {
     char input[MAX_INPUT_SIZE];
+    memset(input, 0 , sizeof(input));
     fgets(input, MAX_INPUT_SIZE, stdin);
     command cmd;
     cmd.client = socket;
@@ -114,6 +117,7 @@ void recv_command(int socket, command *c)
         int res = recv(socket, temp, sizeof(temp), 0);
         strcpy(c->argv[i], temp);
         send(socket, PARAMS(res));
+        c->argv[i][strlen(c->argv[i])] = '\0';
     }
 }
 
@@ -139,6 +143,7 @@ void recv_entry(int socket, entry *e)
         int res = recv(socket, temp, sizeof(temp), 0);
         strcpy(e->paths[i], temp);
         send(socket, PARAMS(res));
+        e->paths[i][strlen(e->paths[i])] = '\0';
     }
 }
 void send_command(int socket, command * c)
@@ -158,7 +163,6 @@ void send_command(int socket, command * c)
 }
 void send_entry(int socket, entry *e)
 {
-    if(e->id == -1) return; // HANDLE THIS!!
     int id = e->id, cport = e->cport, nmport = e->nmport, entries = e->entries;
     char IP[IP_SIZE];
     strcpy(IP, e->ip);
@@ -172,5 +176,17 @@ void send_entry(int socket, entry *e)
     {
         int res = send(socket, SPARAM(e->paths[i]));
         recv(socket, PARAMS(res)); // ack
+    }
+}
+
+void empty_entry(entry *e)
+{
+    e->id = -1;
+    e->cport = -1;
+    e->nmport = -1;
+    e->ip[0] = '\0';
+    e->entries = -1;
+    for (int i = 0; i < MAX_ENTRIES; i++) {
+        e->paths[i][0] = '\0';
     }
 }
