@@ -51,7 +51,9 @@ void * handle_client(void * args)
     command *c = malloc(sizeof(command));
     recv_command(socket, c);
     printf("SS1 recieved command from :%d, %s \n", socket, c->cmd);
-
+    executeCmd(c, socket);
+    printf("sent command %s\n", c->cmd);
+    sleep(1);
     free(args);
     close(socket);
 }
