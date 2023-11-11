@@ -16,6 +16,11 @@ void SS_connect(int port, command *c)
         printf("Error in connection\n"); return;
     }
     send_command(network_socket, c);
+    char response[MAX_INPUT_SIZE];
+    memset(response, 0, sizeof(response));
+    sleep(1);
+    int x = recv(network_socket, response, sizeof(response), 0);
+    printf("recieved %d response: \n%s\n", x, response);
 }
 
 void *clienthread(void * args)

@@ -137,6 +137,7 @@ void * server_thread(void * args)
 }
 int main()
 {
+    sem_init(&clientLock, 0, 10);
     pthread_t cth, sth;
     pthread_create(&cth, NULL, client_thread, NULL);
     pthread_create(&sth, NULL, server_thread, NULL);
