@@ -8,17 +8,9 @@
 #define MAX_PATH_SIZE 4096
 #define MAX_ENTRIES 1024
 
-typedef struct entry {
-    int id;
-    char ip[IP_SIZE];
-    int cport;
-    int nmport;
-    int entries;
-    char paths[MAX_ENTRIES][MAX_PATH_SIZE];
-} entry;
+#include "entry.h"
 
-extern entry EMPTY_ENTRY;
-extern sem_t clientLock;
+sem_t clientLock; //does this need to be extern check that
 
 int writeToFile(const char *filename, const char *content);
 int appendToFile(const char *filename, const char *content);
