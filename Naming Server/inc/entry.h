@@ -11,6 +11,5 @@ typedef struct entry
     char paths[MAX_ENTRIES][MAX_PATH_SIZE];
 }entry;
 
-entry EMPTY_ENTRY;
 
 #endif
