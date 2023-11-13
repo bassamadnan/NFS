@@ -10,7 +10,7 @@
 
 #include "entry.h"
 
-// sem_t clientLock; //does this need to be extern check that
+sem_t clientLock; //does this need to be extern check that
 
 int writeToFile(const char *filename, const char *content);
 int appendToFile(const char *filename, const char *content);

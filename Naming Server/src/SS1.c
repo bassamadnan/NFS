@@ -50,7 +50,7 @@ void * handle_client(void * args)
     int socket = *(int *)args;
     command *c = malloc(sizeof(command));
     recv_command(socket, c);
-    printf("SS1 recieved command from :%d, %s \n", socket, c->cmd);
+    printf("SS1 recieved command from socket :%d, client : %d, %s \n", socket,c->client, c->cmd);
     executeCmd(c, socket);
     printf("sent command %s\n", c->cmd);
     sleep(1);
