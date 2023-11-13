@@ -109,11 +109,16 @@ void empty_entry(entry *e)
     e->id = -1;
     e->cport = -1;
     e->nmport = -1;
-    e->ip[0] = '\0';
-    e->entries = -1;
-    for (int i = 0; i < MAX_ENTRIES; i++) {
-        e->paths[i][0] = '\0';
-    }
+    strcpy(e->ip, "000.000.000.000");
+    e->entries = 0;
 }
 
+void send_ACK(int socket, int code)
+{
+    return;
+}
 
+void recv_ACK(int socket)
+{
+    return;
+}

@@ -10,6 +10,6 @@ generate.c
 info.c
 a/b.txt
 a/a.txt
-yourmom.txt
+b.txt
 a/a.txt/b
 a.txt

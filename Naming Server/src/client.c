@@ -42,8 +42,9 @@ void *clienthread(void * args)
         entry *e = malloc(sizeof(entry)); // free this later !!
         empty_entry(e);
         recv_entry(network_socket, e);
-        printf("In port : %d\n", e->cport);
-        SS_connect(e->cport, &c);
+
+        if(e->id != -1) SS_connect(e->cport, &c);
+        if(e->id == -1) printf("from NM: bad request \n");
 
     }
     close(network_socket);

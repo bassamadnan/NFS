@@ -31,7 +31,6 @@ void * client_function(int * x)
                 if(strcmp(path, entries[i].paths[id]) == 0)
                 {
                     ss = i;
-                    // send_entry(client_socket, &entries[i]);
                     break;
                 }
                 id++;
@@ -43,15 +42,12 @@ void * client_function(int * x)
         {
             printf("Found in ID: %d, listening on port %d, ip: %s\n", entries[ss].id, entries[ss].cport, entries[ss].ip);
             e = entries[ss];
-            // send_entry(client_socket, &entries[ss]);
         }
         else{
             printf("Client %d requested for %s\n", client_socket, path);
-            // e.id = -1;
             printf("Not found\n");
         }
         send_entry(client_socket, &e);
-
     }
     close(client_socket);
 }
@@ -138,7 +134,7 @@ void * server_thread(void * args)
 }
 int main()
 {
-    sem_init(&clientLock, 0, 10);
+    // sem_init(&clientLock, 0, 10);
     pthread_t cth, sth;
     pthread_create(&cth, NULL, client_thread, NULL);
     pthread_create(&sth, NULL, server_thread, NULL);

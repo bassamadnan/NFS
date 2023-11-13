@@ -7,6 +7,10 @@
 #include "commands.h"
 #include "entry.h"
 
+typedef struct ACK
+{
+    int id;
+}ACK;
 
 int connection(int *socket, struct sockaddr_in *addr, int *stat);
 int msgsend(int *network_socket, char *client_request);
