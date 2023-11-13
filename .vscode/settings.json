@@ -5,6 +5,7 @@
         "functional": "c",
         "cmds.h": "c",
         "types.h": "c",
-        "fileapi.h": "c"
+        "fileapi.h": "c",
+        "file_operations.h": "c"
     }
 }
