@@ -7,8 +7,8 @@
 #include <stdio.h>
 #include "defs.h"
 
-#define MAX_INPUT_SIZE 5000
-#define MAX_WORDS 512
+#define MAX_INPUT_SIZE 5000 
+#define MAX_WORDS 512  
 
 typedef struct command {
     int client;
@@ -19,5 +19,5 @@ typedef struct command {
 
 command parser(int socket);
 
-#endif // COMMANDS_H
+#endif 
 
