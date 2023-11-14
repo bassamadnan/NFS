@@ -73,9 +73,11 @@ int deleteFile(const char *filename) {
 int moveFile(const char *source, const char *destination) {
     // // sem_wait(&clientLock);
     if (rename(source, destination) == 0) {
+        printf("reached rename\n");
         // sem_post(&clientLock);
         return 0; // Return 0 to indicate success
     } else {
+        printf("couldnt reach rename\n");
         // sem_post(&clientLock);
         return 1; // Return 1 to indicate an error
     }

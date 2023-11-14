@@ -6,6 +6,13 @@
 pthread_t tid[60];
 entry entries[MAX_ENTRIES];
 
+int privileged_cmd(command *c)
+{
+    return  (strcmp(c->argv[0], "create") == 0) ||
+            (strcmp(c->argv[0], "delete") == 0) || 
+            (strcmp(c->argv[0], "create") == 0) ||
+            (strcmp(c->argv[0], "move") == 0);
+}
 
 void * client_function(int * x)
 {
@@ -17,6 +24,13 @@ void * client_function(int * x)
         command c;
         recv_command(client_socket, &c);
         printf("Recieved \n");
+        if(privileged_cmd(&c))
+        {
+            // handle privilegd cmds directly between SS
+            // TODO
+            // continue;
+        }
+        // not a privillegd cmd, read/write etc, find an SS and send it back to the client
         int argc = c.argc;
         char path[MAX_PATH_SIZE];
         memset(path, 0, sizeof(path));
@@ -47,6 +61,8 @@ void * client_function(int * x)
             printf("Client %d requested for %s\n", client_socket, path);
             printf("Not found\n");
         }
+        e.cport = 6061;
+        e.id = 0;
         send_entry(client_socket, &e);
     }
     close(client_socket);
