@@ -81,9 +81,16 @@ void * client_function(int * x)
                 // SSid1 sends data to SSid2 (acts as client?)
                 
             }
-            if(flag == 2 || flag == 1)
+            if(flag == 2)
             {
                 int id = find_SS(c->argv[c->argc - 1], 1);
+                if(!check_SS(id)) break; // error code here
+                // create a file in this SS
+                NM_connect(id, c);
+            }
+            if(flag == 1)
+            {
+                int id = find_SS(c->argv[c->argc - 1], 0);
                 if(!check_SS(id)) break; // error code here
                 // create a file in this SS
                 NM_connect(id, c);
