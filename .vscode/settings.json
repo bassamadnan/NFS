@@ -9,6 +9,10 @@
         "file_operations.h": "c",
         "command_execution.h": "c",
         "commands.h": "c",
-        "defs.h": "c"
+        "defs.h": "c",
+        "hash.h": "c",
+        "syscall.h": "c",
+        "network.h": "c",
+        "string.h": "c"
     }
 }

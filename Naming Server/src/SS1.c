@@ -19,7 +19,7 @@ void access_path(entry * e)
     fclose(fp);
 }
 
-void * NM_connect(void * args)
+void * NM_alive(void * args) // sends a packet every 1 second to show its still connected
 {
     int socket = *(int *)args;
     while(1)
@@ -29,12 +29,26 @@ void * NM_connect(void * args)
         // printf("SS1 recieved command from NM on socket : %d, %s \n", socket, c->cmd);
         // executeCmd(c, socket);
         // free(c);
-        int x = 1;
-        send(socket, PARAMS(x));
-        sleep(1);
+        // int x = 1;
+        // send(socket, PARAMS(x));
+        // sleep(1);
     }
-    
     close(socket);
+}
+
+void * NM_handler(void * args)
+{
+    int socket = *(int *)args;
+    
+    while(1)
+    {
+        command *c = malloc(sizeof(command));
+        recv_command(socket, c);
+        printf("SS1 recieved command from NM in socket :%d, cmd :%s \n", socket, c->cmd);
+        executeCmd(c, socket);
+        printf("sent command %s\n", c->cmd);
+        free(c);
+    }
 }
 
 int server_entry(int id, int cport, str init_path)
@@ -120,8 +134,9 @@ int main()
     /*-----------------------------------------*/
     
     int nm_sock = server_entry(id, port, path);
-    pthread_t clnt, serv;
-    pthread_create(&serv, 0, NM_connect, &nm_sock);
+    pthread_t clnt, serv, nm;
+    pthread_create(&serv, 0, NM_alive, &nm_sock);
+    pthread_create(&nm, 0, NM_handler, &nm_sock);
     pthread_create(&clnt, 0, init_server, &port);
     pthread_join(clnt, NULL);
     return 0;

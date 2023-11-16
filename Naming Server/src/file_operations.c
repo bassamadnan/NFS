@@ -149,12 +149,16 @@ int readFile(const char *filename, char **buffer, size_t *size) {
 
 int makeDirectory(const char *path) {
     // // sem_wait(&clientLock);
-    if (mkdir(path, 0777) == 0) {
+    char * temp = calloc(MAX_PATH_SIZE, sizeof(char));
+    strcpy(temp, "./");
+    strcat(temp, path);
+    if (mkdir(temp, 0777) == 0) {
         // sem_post(&clientLock);
-
+        free(temp);
         return 0; // Return 0 to indicate success
     } 
     else {
+        free(temp);
         // sem_post(&clientLock);
         return 1; // Return 1 to indicate an error
     }

@@ -1,9 +1,7 @@
-#include "hash.h"
+#include "../inc/hash.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define MAP_SIZE 100
 
 struct KeyValue {
     char* key;
@@ -16,6 +14,7 @@ struct KeyValue {
 struct HashMap {
     struct KeyValue* table[MAP_SIZE];
 };
+
 
 unsigned int hash(const char* key);
 int max(int a, int b);

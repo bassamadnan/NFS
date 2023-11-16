@@ -2,27 +2,61 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/syscall.h>
+#include "../inc/hash.h"
 
+
+typedef struct severstat
+{
+    int socket; // socket for the NM to communicate with this 
+    int isalive;
+}serverstat;
+
+
+serverstat SS_stat[MAX_ENTRIES]; // 0 if not connected, 1 if connected
+
+typedef struct HashMap {
+    struct KeyValue* table[MAP_SIZE];
+} map_t;
+
+map_t ID; // maps the entries of an SS to their IDs, insertion find ->logn
 pthread_t tid[60];
 entry entries[MAX_ENTRIES];
-int isalive[MAX_ENTRIES]; // 0 if not connected, 1 if connected
 
-int privileged_cmd(command *c)
+
+
+void trim_path(str path)
 {
-    return  (strcmp(c->argv[0], "create") == 0) ||
-            (strcmp(c->argv[0], "delete") == 0) || 
-            (strcmp(c->argv[0], "create") == 0) ||
-            (strcmp(c->argv[0], "move") == 0);
+    int len = strlen(path) - 1; 
+    while(len && (path[len] != '\\'))
+    {
+        path[len] = '\0';
+        len--;
+    }
 }
 
-int find_SS(command *c)
+int find_SS(str full_path, int trim)
 {
     // Finds the SS the command is intended from
+    // c->argv[argc - 1] contains the path, we need to check the last '/'
+    str path = calloc(MAX_PATH_SIZE, sizeof(char));
+    strcpy(path, full_path);
+    if(trim) trim_path(path);
+    // use find here
+    int id = find(&ID, path);
+    free(path);
+    return id;
+
 }
 
 int check_SS(id)
 {
-    return isalive[id];
+    return SS_stat[id].isalive;
+}
+
+void NM_connect(int id, command *c)
+{
+    int socket = SS_stat[id].socket;
+    send_command(socket, c);
 }
 
 void * client_function(int * x)
@@ -35,35 +69,35 @@ void * client_function(int * x)
         command *c = malloc(sizeof(command));
         recv_command(client_socket, c);
         printf("Recieved \n");
-        if(privileged_cmd(c))
+        int flag;
+        if((flag = privileged_cmd(c)) != 0)
         {
-            // handle privilegd cmds directly between SS
-            // TODO
-            int id = find_SS(c);
-            // required SS is in entries[id]
-            int flag = check_SS(id);
-            // continue;
+            if(flag == 3)
+            {
+                // copy path1 to path2 without trim
+                int id1 = find_SS(c->argv[c->argc - 1], 0); // dest
+                int id2 = find_SS(c->argv[c->argc - 2], 0); // src
+                if(!(check_SS(id1) && check_SS(id2))) break; // error code here
+                // SSid1 sends data to SSid2 (acts as client?)
+                
+            }
+            if(flag == 2 || flag == 1)
+            {
+                int id = find_SS(c->argv[c->argc - 1], 1);
+                if(!check_SS(id)) break; // error code here
+                // create a file in this SS
+                NM_connect(id, c);
+            }
+            continue;
         }
         // not a privillegd cmd, read/write etc, find an SS and send it back to the client
         int argc = c->argc;
         char path[MAX_PATH_SIZE];
         memset(path, 0, sizeof(path));
         strcpy(path, c->argv[argc - 1]);
-        int ss = -1;
-        for(int i=0; i < MAX_ENTRIES; i++)
-        {
-            int id = 0;
-            while(id < entries[i].entries)
-            {
-                // printf("Compared %s with %s\n",path, entries[i].paths[id]);
-                if(strcmp(path, entries[i].paths[id]) == 0)
-                {
-                    ss = i;
-                    break;
-                }
-                id++;
-            }
-        }
+
+        int ss = find(&ID, path); // logn
+
         entry e;
         empty_entry(&e);
         if(ss != -1)
@@ -92,22 +126,27 @@ void server_function(int * x)
     int i = 0;
     printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s from thread: 1\n", e->id, e->entries, e->cport, e->nmport, e->ip);
     entries[e->id] = *e;
-    isalive[e->id] = 1;
+
+    SS_stat[e->id] = (serverstat){
+        .socket = SS_socket,
+        .isalive = 1
+    };
     while(i<e->entries)
     {
+        insert(&ID, e->paths[i], e->id);
         printf("%s\n", e->paths[i++]);
     }
     while(1)
     {
-        sleep(1);
-        int x = 0;
-        recv(SS_socket, PARAMS(x));
-        printf("Recieved : %d\n", x);
-        if(!x)
-        {
-            isalive[e->id] = 0;
-            break;
-        }
+        // sleep(1);
+        // int x = 0;
+        // recv(SS_socket, PARAMS(x));
+        // printf("Recieved : %d\n", x);
+        // if(!x)
+        // {
+        //     SS_stat[e->id].isalive = 0;
+        //     break;
+        // }
     }
     close(SS_socket);
 }
@@ -176,10 +215,13 @@ void * server_thread(void * args)
     }
 
 }
+
+
 int main()
 {
     // sem_init(&clientLock, 0, 10);
     pthread_t cth, sth;
+    initHashMap(&ID);
     pthread_create(&cth, NULL, client_thread, NULL);
     pthread_create(&sth, NULL, server_thread, NULL);
     pthread_join(cth, NULL);

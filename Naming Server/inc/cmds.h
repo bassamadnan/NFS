@@ -5,23 +5,15 @@
 #include "network.h"
 #include "file_operations.h"
 #include "command_execution.h"
-
-void SS_connect(int port, command *c)
-{
-    int network_socket;
-    network_socket = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in server_address;
-    server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = INADDR_ANY;
-    server_address.sin_port = htons(port);
-    int connection_status;
-    if(connection(&network_socket, &server_address, &connection_status))
-    {
-        printf("Error in connection\n"); return;
-    }
-    send_command(network_socket, c);
-    char response[MAX_INPUT_SIZE];
-    memset(response, 0, sizeof(response));
-    int x = recv(network_socket, response, sizeof(response), 0);
-    printf("recieved %d response: \n%s\n", x, response);
+int stringcmp(const str s1, const str s2) {
+    return !strcmp(s1, s2);
 }
+
+int privileged_cmd(command *c)
+{
+    if(stringcmp(c->argv[0], "move") || stringcmp(c->argv[0], "copy")) return 3;
+    if(stringcmp(c->argv[0], "create")) return 2;
+    if(stringcmp(c->argv[0], "delete")) return 1; 
+    return 0;
+}
+//#include "hash.h"

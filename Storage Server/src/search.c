@@ -5,8 +5,8 @@ void find(str path)
 {
     return;
 }
-int compare_strings(const void* s1, const void* s2) {
-    return strcmp(*(const str_arr) s1, *(const str_arr) s2);
+int stringcmp(const void* s1, const void* s2) {
+    return !strcmp(*(const str_arr) s1, *(const str_arr) s2);
 }
 
 str_arr get_paths()
