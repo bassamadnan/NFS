@@ -5,6 +5,7 @@
 
 pthread_t tid[60];
 entry entries[MAX_ENTRIES];
+int isalive[MAX_ENTRIES]; // 0 if not connected, 1 if connected
 
 int privileged_cmd(command *c)
 {
@@ -14,6 +15,16 @@ int privileged_cmd(command *c)
             (strcmp(c->argv[0], "move") == 0);
 }
 
+int find_SS(command *c)
+{
+    // Finds the SS the command is intended from
+}
+
+int check_SS(id)
+{
+    return isalive[id];
+}
+
 void * client_function(int * x)
 {
     int client_socket = *x;
@@ -21,20 +32,23 @@ void * client_function(int * x)
     
     for(;;)
     {
-        command c;
-        recv_command(client_socket, &c);
+        command *c = malloc(sizeof(command));
+        recv_command(client_socket, c);
         printf("Recieved \n");
-        if(privileged_cmd(&c))
+        if(privileged_cmd(c))
         {
             // handle privilegd cmds directly between SS
             // TODO
+            int id = find_SS(c);
+            // required SS is in entries[id]
+            int flag = check_SS(id);
             // continue;
         }
         // not a privillegd cmd, read/write etc, find an SS and send it back to the client
-        int argc = c.argc;
+        int argc = c->argc;
         char path[MAX_PATH_SIZE];
         memset(path, 0, sizeof(path));
-        strcpy(path, c.argv[argc - 1]);
+        strcpy(path, c->argv[argc - 1]);
         int ss = -1;
         for(int i=0; i < MAX_ENTRIES; i++)
         {
@@ -60,6 +74,7 @@ void * client_function(int * x)
         else{
             printf("Client %d requested for %s\n", client_socket, path);
             printf("Not found\n");
+            return;
         }
         e.cport = 6061;
         e.id = 0;
@@ -69,19 +84,32 @@ void * client_function(int * x)
 }
 void server_function(int * x)
 {
-    int client_socket = *x;
+    int SS_socket = *x;
     free(x);
     entry *e = malloc(sizeof(entry));
     empty_entry(e);
-    recv_entry(client_socket, e);
+    recv_entry(SS_socket, e);
     int i = 0;
     printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s from thread: 1\n", e->id, e->entries, e->cport, e->nmport, e->ip);
+    entries[e->id] = *e;
+    isalive[e->id] = 1;
     while(i<e->entries)
     {
         printf("%s\n", e->paths[i++]);
     }
-    entries[e->id] = *e;
-    close(client_socket);
+    while(1)
+    {
+        sleep(1);
+        int x = 0;
+        recv(SS_socket, PARAMS(x));
+        printf("Recieved : %d\n", x);
+        if(!x)
+        {
+            isalive[e->id] = 0;
+            break;
+        }
+    }
+    close(SS_socket);
 }
 
 void * client_thread(void * args)

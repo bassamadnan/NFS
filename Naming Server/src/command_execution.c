@@ -59,7 +59,7 @@ int executeCmd(command * cmd, int socket){
             return 1; 
         }
     } 
-    else if (strcmp(subcmd, "copy") == 0) 
+    else if (strcmp(subcmd, "copy") == 0) // 200 , 201-> f , 202 -> copyd
     {
         if (cmd->argc < 4) 
         {

@@ -7,6 +7,8 @@
         "types.h": "c",
         "fileapi.h": "c",
         "file_operations.h": "c",
-        "command_execution.h": "c"
+        "command_execution.h": "c",
+        "commands.h": "c",
+        "defs.h": "c"
     }
 }

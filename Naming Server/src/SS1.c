@@ -19,8 +19,25 @@ void access_path(entry * e)
     fclose(fp);
 }
 
+void * NM_connect(void * args)
+{
+    int socket = *(int *)args;
+    while(1)
+    {
+        // command *c = malloc(sizeof(command));
+        // recv_command(socket, c);
+        // printf("SS1 recieved command from NM on socket : %d, %s \n", socket, c->cmd);
+        // executeCmd(c, socket);
+        // free(c);
+        int x = 1;
+        send(socket, PARAMS(x));
+        sleep(1);
+    }
+    
+    close(socket);
+}
 
-void server_entry(int id, int cport, str init_path)
+int server_entry(int id, int cport, str init_path)
 {
     int network_socket;
     network_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -31,7 +48,7 @@ void server_entry(int id, int cport, str init_path)
     int connection_status;
     if(connection(&network_socket, &server_address, &connection_status))
     {
-        printf("Error in connection\n"); return;
+        printf("Error in connection\n"); return -1;
     }
     entry e;
     e.id = id;
@@ -40,7 +57,7 @@ void server_entry(int id, int cport, str init_path)
     e.nmport = NM_SERVER_PORT;  // communication to the NM via the 6060 port
     access_path(&e);  // read all paths from generate.txt, send it to NM
     send_entry(network_socket, &e);
-    close(network_socket); 
+    return network_socket;
 }
 
 void * handle_client(void * args)
@@ -102,8 +119,9 @@ int main()
     char path[] = "/home/bassam/Desktop/FP/Storage Server/src";
     /*-----------------------------------------*/
     
-    server_entry(id, port, path);
-    pthread_t clnt;
+    int nm_sock = server_entry(id, port, path);
+    pthread_t clnt, serv;
+    pthread_create(&serv, 0, NM_connect, &nm_sock);
     pthread_create(&clnt, 0, init_server, &port);
     pthread_join(clnt, NULL);
     return 0;

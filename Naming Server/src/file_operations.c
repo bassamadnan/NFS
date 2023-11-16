@@ -82,7 +82,6 @@ int moveFile(const char *source, const char *destination) {
         return 1; // Return 1 to indicate an error
     }
 }
-
 int getFileInfo(const char *filename, char *infoBuffer, size_t bufferSize) {
     // // sem_wait(&clientLock);
     struct stat file_info;
@@ -152,6 +151,7 @@ int makeDirectory(const char *path) {
     // // sem_wait(&clientLock);
     if (mkdir(path, 0777) == 0) {
         // sem_post(&clientLock);
+
         return 0; // Return 0 to indicate success
     } 
     else {
@@ -232,7 +232,6 @@ int copyFile(const char *source, const char *destination) {
     // sem_post(&clientLock);
     return 0; // Return 0 to indicate success
 }
-
 int copyDirectory(const char *source, const char *destination) {
     // // sem_wait(&clientLock);
     DIR *dir = opendir(source);
