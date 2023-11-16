@@ -30,3 +30,9 @@ Client input is handeled mainly via the struct of `command` , this is send to th
 tldr; had to serialize and deserialize structs :(
 As mentioned earlier, we avoided serializing/deserializing of structs, but this came with problems of their own. Functions `send/recv_entry/command()` have been added for now to deal with the sending and reciving of data. ACK `int(s)` have also been sent perhaps as a temporary palceholder for ACKS in the future (**TODO?**)
 **REMEBMER** - premature free causing socket file descriptor to change. handle later
+## Adding privileged commands
+
+So far we have been treating all the commands of the client as privileged. That is not the case however since some commands require privilge to execute (`Copy/Delete/Create`). Functionalities to check if a command is privileged have been added alongside handling them directly via the NM. The NM finds the SS this command is intended for and forwards the command to the SS via the socket it had obtained.
+> Sockets are tracked using SS_stat structure which gives the status of connections for every server having an entry with the NM. It contains two attributes for now, the socket of this SS and the connection status of this SS.
+
+Threads for listening to NM commands have been added in the SS code which listens via the socket it initially connected to during its entry.
