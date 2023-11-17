@@ -1,13 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "defs.h"
 
-
+#define CACHE_SIZE 5
 // Define a node for the linked list
 typedef struct CacheNode {
     struct CacheEntry {
-        char filename[MAX_PATH_SIZE];  
+        char filename[1024];  
         int serverID;
     } entry;
     struct CacheNode* next;
@@ -32,6 +31,7 @@ LRUCache* createCache(int capacity) {
     return cache;
 }
 
+LRUCache* cache;
 // Add a file to the cache
 void addFile(LRUCache* cache, const char* filename, int serverID) {
     // Create a new cache node
@@ -107,30 +107,30 @@ void printCache(LRUCache* cache) {
     }
 }
 
-// int main() {
-//     LRUCache* cache = createCache(CACHE_SIZE);
+int main() {
+    cache = createCache(CACHE_SIZE);
 
-//     struct CacheEntry entry;
+    struct CacheEntry entry;
 
-//     // Add files to the cache
-//     addFile(cache, "file1.txt", 1); // Specify the storage server ID
-//     addFile(cache, "file2.txt", 2); // Specify the storage server ID
-//     addFile(cache, "file3.txt", 3); // Specify the storage server ID
-//     entry = retrieveEntry(cache, "file1.txt");
-//     printCache(cache);
-//     addFile(cache, "file4.txt", 1); // Specify the storage server ID
-//     addFile(cache, "file5.txt", 2); // Specify the storage server ID
-//     printCache(cache);
-//     addFile(cache, "file6.txt", 3); // Specify the storage server ID
-//     entry = retrieveEntry(cache, "file7.txt");
-//     printCache(cache);
+    // Add files to the cache
+    addFile(cache, "file1.txt", 1); // Specify the storage server ID
+    addFile(cache, "file2.txt", 2); // Specify the storage server ID
+    addFile(cache, "file3.txt", 3); // Specify the storage server ID
+    entry = retrieveEntry(cache, "file1.txt");
+    printCache(cache);
+    addFile(cache, "file4.txt", 1); // Specify the storage server ID
+    addFile(cache, "file5.txt", 2); // Specify the storage server ID
+    printCache(cache);
+    addFile(cache, "file6.txt", 3); // Specify the storage server ID
+    entry = retrieveEntry(cache, "file7.txt");
+    printCache(cache);
 
     
-//     if (entry.serverID != -1) {
-//         printf("File found: File: %s, Storage Server ID: %d\n", entry.filename, entry.serverID);
-//     } else {
-//         printf("File not found\n");
-//     }
+    if (entry.serverID != -1) {
+        printf("File found: File: %s, Storage Server ID: %d\n", entry.filename, entry.serverID);
+    } else {
+        printf("File not found\n");
+    }
 
-//     return 0;
-// }
+    return 0;
+}

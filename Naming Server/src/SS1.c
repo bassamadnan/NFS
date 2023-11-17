@@ -129,7 +129,7 @@ int main()
 
 
     /*-----------------------------------------*/
-    int id = 0, port = 6061;
+    int id = 1, port = 6061;
     char path[] = "/home/bassam/Desktop/FP/Storage Server/src";
     /*-----------------------------------------*/
     

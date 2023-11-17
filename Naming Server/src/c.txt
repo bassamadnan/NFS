@@ -1,0 +1,3 @@
+newdir
+newdir/a.c
+a.c

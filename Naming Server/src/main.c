@@ -3,13 +3,15 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 #include "../inc/hash.h"
-
+#include "../inc/lru.h"
 
 typedef struct severstat
 {
     int socket; // socket for the NM to communicate with this 
     int isalive;
 }serverstat;
+
+LRUCache* cache;
 
 
 serverstat SS_stat[MAX_ENTRIES]; // 0 if not connected, 1 if connected
@@ -27,11 +29,12 @@ entry entries[MAX_ENTRIES];
 void trim_path(str path)
 {
     int len = strlen(path) - 1; 
-    while(len && (path[len] != '\\'))
+    while(len && (path[len] != '/'))
     {
         path[len] = '\0';
         len--;
     }
+    if(len) path[len] = '\0';
 }
 
 int find_SS(str full_path, int trim)
@@ -42,7 +45,33 @@ int find_SS(str full_path, int trim)
     strcpy(path, full_path);
     if(trim) trim_path(path);
     // use find here
-    int id = find(&ID, path);
+    if(!path)
+    {
+        free(path);
+        return 0;
+    }
+    printf("before\n");
+    struct CacheEntry catch = retrieveEntry(cache, path);
+    printf("after %s\n", path);
+    int id = 0;
+    if(catch.serverID == -1){
+        id = find(&ID, path); // logn
+        printf("cache miss: %d\n", id);
+        if(id)
+        {
+            addFile(cache, path, id);
+        } 
+    }
+    else
+    {
+        id = catch.serverID;
+        printf("cache hit: %d\n", id);
+    }
+    if(id)
+        printf("valid for %d,  path: %s\n", id, path);
+    else 
+        printf("invalid for %d,  path: %s\n", id, path);
+
     free(path);
     return id;
 
@@ -77,21 +106,22 @@ void * client_function(int * x)
                 // copy path1 to path2 without trim
                 int id1 = find_SS(c->argv[c->argc - 1], 0); // dest
                 int id2 = find_SS(c->argv[c->argc - 2], 0); // src
-                if(!(check_SS(id1) && check_SS(id2))) break; // error code here
+                if(!(check_SS(id1) && check_SS(id2))) continue; // error code here
+
                 // SSid1 sends data to SSid2 (acts as client?)
                 
             }
             if(flag == 2)
             {
                 int id = find_SS(c->argv[c->argc - 1], 1);
-                if(!check_SS(id)) break; // error code here
+                if(!check_SS(id)) continue; // error code here
                 // create a file in this SS
                 NM_connect(id, c);
             }
             if(flag == 1)
             {
                 int id = find_SS(c->argv[c->argc - 1], 0);
-                if(!check_SS(id)) break; // error code here
+                if(!check_SS(id)) continue; // error code here
                 // create a file in this SS
                 NM_connect(id, c);
             }
@@ -103,11 +133,11 @@ void * client_function(int * x)
         memset(path, 0, sizeof(path));
         strcpy(path, c->argv[argc - 1]);
 
-        int ss = find(&ID, path); // logn
+        int ss = find_SS(path, 0);
 
         entry e;
         empty_entry(&e);
-        if(ss != -1)
+        if(ss)
         {
             printf("Found in ID: %d, listening on port %d, ip: %s\n", entries[ss].id, entries[ss].cport, entries[ss].ip);
             e = entries[ss];
@@ -117,8 +147,6 @@ void * client_function(int * x)
             printf("Not found\n");
             return;
         }
-        e.cport = 6061;
-        e.id = 0;
         send_entry(client_socket, &e);
     }
     close(client_socket);
@@ -227,6 +255,7 @@ void * server_thread(void * args)
 int main()
 {
     // sem_init(&clientLock, 0, 10);
+    cache = createCache(CACHE_SIZE);
     pthread_t cth, sth;
     initHashMap(&ID);
     pthread_create(&cth, NULL, client_thread, NULL);

@@ -3,18 +3,18 @@
 int executeCmd(command * cmd, int socket){
     
     if (cmd->argc < 2) {
-        printf("Insufficient arguments.\n");
-        return 1; 
+        // printf("Insufficient arguments.\n");
+        return -1; 
     }
 
     char *subcmd = cmd->argv[0];
-
+    
     if (strcmp(subcmd, "create") == 0) 
     {
         if (cmd->argc < 3) 
         {
-            printf("Insufficient arguments for create command.\n");
-            return 1;
+            // printf("Insufficient arguments for create command.\n");
+            return -1;
         }
 
         char *type = cmd->argv[1];
@@ -30,16 +30,16 @@ int executeCmd(command * cmd, int socket){
         } 
         else 
         {
-            printf("Invalid create subcommand.\n");
-            return 1;
+            // printf("Invalid create subcommand.\n");
+            return -2;
         }
     } 
     else if (strcmp(subcmd, "delete") == 0) 
     {
         if (cmd->argc < 3) 
         {
-            printf("Insufficient arguments for delete command.\n");
-            return 1; 
+            // printf("Insufficient arguments for delete command.\n");
+            return -1; 
         }
 
         char *type = cmd->argv[1];
@@ -55,16 +55,16 @@ int executeCmd(command * cmd, int socket){
         } 
         else 
         {
-            printf("Invalid delete subcommand.\n");
-            return 1; 
+            // printf("Invalid delete subcommand.\n");
+            return -2; 
         }
     } 
     else if (strcmp(subcmd, "copy") == 0) // 200 , 201-> f , 202 -> copyd
     {
         if (cmd->argc < 4) 
         {
-            printf("Insufficient arguments for copy command.\n");
-            return 1;
+            // printf("Insufficient arguments for copy command.\n");
+            return -1;
         }
 
         char *type = cmd->argv[1];
@@ -81,16 +81,16 @@ int executeCmd(command * cmd, int socket){
         } 
         else 
         {
-            printf("Invalid copy subcommand.\n");
-            return 1;
+            // printf("Invalid copy subcommand.\n");
+            return -2;
         }
     } 
     else if (strcmp(subcmd, "move") == 0) 
     {
         if (cmd->argc < 4) 
         {
-            printf("Insufficient arguments for move command.\n");
-            return 1;
+            // printf("Insufficient arguments for move command.\n");
+            return -1;
         }
 
         char *type = cmd->argv[1];
@@ -107,16 +107,16 @@ int executeCmd(command * cmd, int socket){
         } 
         else 
         {
-            printf("Invalid move subcommand.\n");
-            return 1; 
+            // printf("Invalid move subcommand.\n");
+            return -2; 
         }
     } 
     else if (strcmp(subcmd, "write") == 0) 
     {
         if (cmd->argc < 3) 
         {
-            printf("Insufficient arguments for write command.\n");
-            return 1; 
+            // printf("Insufficient arguments for write command.\n");
+            return -1; 
         }
 
         char content[MAX_INPUT_SIZE] = "";
@@ -138,8 +138,8 @@ int executeCmd(command * cmd, int socket){
     else if (strcmp(subcmd, "read") == 0) 
     {
         if (cmd->argc < 2) {
-            printf("Insufficient arguments for read command.\n");
-            return 1; 
+            // printf("Insufficient arguments for read command.\n");
+            return -1; 
         }
 
         char *path = cmd->argv[1];
@@ -157,8 +157,8 @@ int executeCmd(command * cmd, int socket){
     }
     else if (strcmp(subcmd, "getinfo") == 0) {
         if (cmd->argc < 2) {
-            printf("Insufficient arguments for getinfo command.\n");
-            return 1; 
+            // printf("Insufficient arguments for getinfo command.\n");
+            return -1; 
         }
 
         char *path = cmd->argv[1];
@@ -170,10 +170,9 @@ int executeCmd(command * cmd, int socket){
     }
     else 
     {
-        printf("Invalid command.\n");
-        return 1; 
+        // printf("Invalid command.\n");
+        return -3; 
     }
 
     return 0;
 }
-

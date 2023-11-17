@@ -10,3 +10,4 @@
 #define NM_SERVER_PORT  6060 
 #define MAX_INPUT_SIZE 5000 
 #define MAX_WORDS   512
+#define CACHE_SIZE 5

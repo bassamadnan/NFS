@@ -1,10 +1,10 @@
 #include "../inc/cmds.h"
-
+//#include "../inc/network.h"
 
 void access_path(entry * e)
 {
     // fills the e.paths value with the directories in generate.txt
-    FILE* fp = fopen("a.txt", "r");
+    FILE* fp = fopen("c.txt", "r");
     int i = 0;   
     if (fp == NULL) {
         perror("Error opening the file");
@@ -19,8 +19,39 @@ void access_path(entry * e)
     fclose(fp);
 }
 
+void * NM_alive(void * args) // sends a packet every 1 second to show its still connected
+{
+    int socket = *(int *)args;
+    while(1)
+    {
+        // command *c = malloc(sizeof(command));
+        // recv_command(socket, c);
+        // printf("SS1 recieved command from NM on socket : %d, %s \n", socket, c->cmd);
+        // executeCmd(c, socket);
+        // free(c);
+        // int x = 1;
+        // send(socket, PARAMS(x));
+        // sleep(1);
+    }
+    close(socket);
+}
 
-void server_entry(int id, int cport, str init_path)
+void * NM_handler(void * args)
+{
+    int socket = *(int *)args;
+    
+    while(1)
+    {
+        command *c = malloc(sizeof(command));
+        recv_command(socket, c);
+        printf("SS1 recieved command from NM in socket :%d, cmd :%s \n", socket, c->cmd);
+        executeCmd(c, socket);
+        printf("sent command %s\n", c->cmd);
+        free(c);
+    }
+}
+
+int server_entry(int id, int cport, str init_path)
 {
     int network_socket;
     network_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -31,7 +62,7 @@ void server_entry(int id, int cport, str init_path)
     int connection_status;
     if(connection(&network_socket, &server_address, &connection_status))
     {
-        printf("Error in connection\n"); return;
+        printf("Error in connection\n"); return -1;
     }
     entry e;
     e.id = id;
@@ -40,7 +71,7 @@ void server_entry(int id, int cport, str init_path)
     e.nmport = NM_SERVER_PORT;  // communication to the NM via the 6060 port
     access_path(&e);  // read all paths from generate.txt, send it to NM
     send_entry(network_socket, &e);
-    close(network_socket); 
+    return network_socket;
 }
 
 void * handle_client(void * args)
@@ -50,7 +81,10 @@ void * handle_client(void * args)
     int socket = *(int *)args;
     command *c = malloc(sizeof(command));
     recv_command(socket, c);
-    printf("SS2 recieved command from :%d, %s \n", socket, c->cmd);
+    printf("SS1 recieved command from socket :%d, client : %d, %s \n", socket,c->client, c->cmd);
+    executeCmd(c, socket);
+    printf("sent command %s\n", c->cmd);
+    sleep(1);
     free(args);
     close(socket);
 }
@@ -95,12 +129,14 @@ int main()
 
 
     /*-----------------------------------------*/
-    int id = 1, port = 6062;
+    int id = 2, port = 6062;
     char path[] = "/home/bassam/Desktop/FP/Storage Server/src";
     /*-----------------------------------------*/
     
-    server_entry(id, port, path);
-    pthread_t clnt;
+    int nm_sock = server_entry(id, port, path);
+    pthread_t clnt, serv, nm;
+    pthread_create(&serv, 0, NM_alive, &nm_sock);
+    pthread_create(&nm, 0, NM_handler, &nm_sock);
     pthread_create(&clnt, 0, init_server, &port);
     pthread_join(clnt, NULL);
     return 0;

@@ -1,7 +1,7 @@
 C = gcc
 CFLAGS = -Wall -lpthread
 
-all: client main SS1 hash
+all: client main SS1 SS2 hash
 
 client: client.c
 		$(CC) -o client commands.c client.c network.c file_operations.c command_execution.c hash.c $(CFLAGS)
@@ -14,6 +14,9 @@ SS1: SS1.c
 
 hash: hash.c
 		$(CC) -o hash SS1.c commands.c network.c file_operations.c command_execution.c hash.c $(CFLAGS)
+
+SS2: SS2.c
+		$(CC) -o SS2 SS2.c commands.c network.c file_operations.c command_execution.c hash.c $(CFLAGS)
 
 clean:
 		rm -f client main SS1 SS2 
