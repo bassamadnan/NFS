@@ -11,3 +11,11 @@
 #define MAX_INPUT_SIZE 5000 
 #define MAX_WORDS   512
 #define CACHE_SIZE 5
+
+#define CRT     (1 << 1)
+#define DLT     (1 << 2)
+#define CPY     (1 << 3)
+#define MOV     (1 << 4)
+#define WRT     (1 << 5)
+#define RED     (1 << 6)
+#define INF     (1 << 7)

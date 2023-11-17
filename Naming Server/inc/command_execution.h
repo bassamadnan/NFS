@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 
-int executeCmd(command *cmd, int socket);
+int executeCmd(command *cmd, int socket, int PERMISSIONS);
 
 #endif // COMMAND_EXECUTION_H
 

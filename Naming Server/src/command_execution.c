@@ -1,6 +1,6 @@
 #include "../inc/command_execution.h"
 
-int executeCmd(command * cmd, int socket){
+int executeCmd(command * cmd, int socket, int PERMISSIONS){
     
     if (cmd->argc < 2) {
         // printf("Insufficient arguments.\n");
@@ -8,8 +8,8 @@ int executeCmd(command * cmd, int socket){
     }
 
     char *subcmd = cmd->argv[0];
-    
-    if (strcmp(subcmd, "create") == 0) 
+
+    if (strcmp(subcmd, "create") == 0 && (PERMISSIONS & CRT)) 
     {
         if (cmd->argc < 3) 
         {
@@ -34,7 +34,7 @@ int executeCmd(command * cmd, int socket){
             return -2;
         }
     } 
-    else if (strcmp(subcmd, "delete") == 0) 
+    else if (strcmp(subcmd, "delete") == 0 && (PERMISSIONS & DLT)) 
     {
         if (cmd->argc < 3) 
         {
@@ -59,7 +59,7 @@ int executeCmd(command * cmd, int socket){
             return -2; 
         }
     } 
-    else if (strcmp(subcmd, "copy") == 0) // 200 , 201-> f , 202 -> copyd
+    else if (strcmp(subcmd, "copy") == 0 && (PERMISSIONS & CPY)) // 200 , 201-> f , 202 -> copyd
     {
         if (cmd->argc < 4) 
         {
@@ -85,7 +85,7 @@ int executeCmd(command * cmd, int socket){
             return -2;
         }
     } 
-    else if (strcmp(subcmd, "move") == 0) 
+    else if (strcmp(subcmd, "move") == 0 && (PERMISSIONS & MOV)) 
     {
         if (cmd->argc < 4) 
         {
@@ -111,7 +111,7 @@ int executeCmd(command * cmd, int socket){
             return -2; 
         }
     } 
-    else if (strcmp(subcmd, "write") == 0) 
+    else if (strcmp(subcmd, "write") == 0 && (PERMISSIONS & WRT)) 
     {
         if (cmd->argc < 3) 
         {
@@ -135,7 +135,7 @@ int executeCmd(command * cmd, int socket){
 
         return writeToFile(path, content);
     }
-    else if (strcmp(subcmd, "read") == 0) 
+    else if (strcmp(subcmd, "read") == 0 && (PERMISSIONS & RED)) 
     {
         if (cmd->argc < 2) {
             // printf("Insufficient arguments for read command.\n");
@@ -155,7 +155,7 @@ int executeCmd(command * cmd, int socket){
 
         return result;
     }
-    else if (strcmp(subcmd, "getinfo") == 0) {
+    else if (strcmp(subcmd, "getinfo") == 0 && (PERMISSIONS & INF)) {
         if (cmd->argc < 2) {
             // printf("Insufficient arguments for getinfo command.\n");
             return -1; 
