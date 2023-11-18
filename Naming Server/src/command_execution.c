@@ -168,6 +168,28 @@ int executeCmd(command * cmd, int socket, int PERMISSIONS){
         send(cmd->client, infoBuffer, strlen(infoBuffer), 0);
         return result;
     }
+    else if(strcmp(subcmd, "append") == 0 && (PERMISSIONS & WRT)){
+        if (cmd->argc < 3) 
+        {
+            // printf("Insufficient arguments for append command.\n");
+            return -1; 
+        }
+        char content[MAX_INPUT_SIZE] = "";
+
+        // Construct content from the arguments (except the last one, which is the path)
+        for (int i = 1; i < cmd->argc - 1; i++) 
+        {
+            strncat(content, cmd->argv[i], sizeof(content) - strlen(content) - 1);
+            if (i < cmd->argc - 2) 
+            {
+                strncat(content, " ", sizeof(content) - strlen(content) - 1);
+            }
+        }
+
+        char *path = cmd->argv[cmd->argc - 1]; // Last argument is the path
+
+        return appendToFile(path, content);
+    }
     else 
     {
         // printf("Invalid command.\n");
