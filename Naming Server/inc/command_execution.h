@@ -12,5 +12,7 @@
 
 int executeCmd(command *cmd, int socket, int PERMISSIONS);
 
+void send_directory(const str dir_path, int socket);
+
 #endif // COMMAND_EXECUTION_H
 

@@ -8,7 +8,7 @@
 #define PORT 8080
 #define BUFFER_SIZE 1024
 
-void send_file(int client_socket) {
+void send_file(int client_socket, str path) {
     FILE *file;
     char buffer[BUFFER_SIZE];
     int bytes_read;

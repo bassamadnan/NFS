@@ -29,6 +29,12 @@ entry entries[MAX_ENTRIES];
 void trim_path(str path)
 {
     int len = strlen(path) - 1; 
+    int i=0;
+    for(; i<len + 1; i++)
+    {
+        if(path[i] == '/') break;
+    }
+    if (i == len + 1) return;
     while(len && (path[len] != '/'))
     {
         path[len] = '\0';
@@ -107,7 +113,8 @@ void * client_function(int * x)
                 int id1 = find_SS(c->argv[c->argc - 1], 0); // dest
                 int id2 = find_SS(c->argv[c->argc - 2], 0); // src
                 if(!(check_SS(id1) && check_SS(id2))) continue; // error code here
-
+                c->client = entries[id1].cport;
+                NM_connect(id2, c);
                 // SSid1 sends data to SSid2 (acts as client?)
                 
             }

@@ -1,6 +1,6 @@
 #include "../inc/cmds.h"
 //#include "../inc/network.h"
-int PERMISSIONS;
+int PERMISSIONS, ID;
 
 void access_path(entry * e)
 {
@@ -18,6 +18,41 @@ void access_path(entry * e)
     }
     (*e).entries = i;
     fclose(fp);
+}
+
+void SS_copy(int port, command *c)
+{
+    // connect to SS listening on port 
+    int network_socket;
+    network_socket = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in server_address;
+    server_address.sin_family = AF_INET;
+    server_address.sin_addr.s_addr = INADDR_ANY;
+    server_address.sin_port = htons(port);
+    int connection_status;
+    if(connection(&network_socket, &server_address, &connection_status))
+    {
+        printf("Error in connection to server listening on port %d\n", port); return;
+    }
+    // 
+    c->client = SUDOC;
+    send_command(network_socket, c);
+    str path = calloc(MAX_PATH_SIZE, sizeof(char));
+    strcpy(path, c->argv[2]);
+    if(stringcmp(c->argv[1], "-f"))
+    {
+        int x = MKFIL;
+        send(x, PARAMS(x));
+        send_command(network_socket, c);
+        send_file(network_socket, path);
+    }
+    else
+    {
+        send_directory(path, network_socket);
+    }
+    free(path);
+    int END_CONNECTION = 2504;
+    send(network_socket, PARAMS(END_CONNECTION));
 }
 
 void * NM_alive(void * args) // sends a packet every 1 second to show its still connected
@@ -45,9 +80,15 @@ void * NM_handler(void * args)
     {
         command *c = malloc(sizeof(command));
         recv_command(socket, c);
-        printf("SS1 recieved command from NM in socket :%d, cmd :%s \n", socket, c->cmd);
+        printf("SS%d recieved command from NM in socket :%d, cmd :%s \n",ID, socket, c->cmd);
+        if(stringcmp(c->argv[0], "copy"))
+        {
+            SS_copy(c->client, c);
+            free(c);
+            continue;
+        }
         executeCmd(c, socket, PERMISSIONS);
-        printf("sent command %s\n", c->cmd);
+        printf("recieved command %s\n", c->cmd);
         free(c);
     }
 }
@@ -75,6 +116,32 @@ int server_entry(int id, int cport, str init_path)
     return network_socket;
 }
 
+void handle_SS(int socket)
+{
+    command *c = malloc(sizeof(command));
+    recv_command(socket, c);
+    while(1)
+    {
+        int operation = -1;
+        recv(socket, PARAMS(operation));
+        if(operation == MKFIL)
+        {
+            command * c = malloc(sizeof(command));
+            recv_command(socket, c);
+            recv_file(socket, c->argv[c->argc - 2]);
+            free(c);
+        }
+        else if(operation == MKDIR)
+        {
+            command * server_cmd = malloc(sizeof(command));
+            recv_command(socket, server_cmd);
+            executeCmd(server_cmd, socket, PERMISSIONS);
+            free(server_cmd);
+        }
+        else break;
+    }
+}
+
 void * handle_client(void * args)
 {
     // client gave some command of the form [OPN] [PATH]
@@ -82,7 +149,14 @@ void * handle_client(void * args)
     int socket = *(int *)args;
     command *c = malloc(sizeof(command));
     recv_command(socket, c);
-    printf("SS1 recieved command from socket :%d, client : %d, %s \n", socket,c->client, c->cmd);
+    if(c->client == -1)
+    {
+        handle_SS(socket);
+        free(args);
+        close(socket);
+        return;
+    }
+    printf("SS%d recieved command from socket :%d, client : %d, %s \n",ID, socket,c->client, c->cmd);
     executeCmd(c, socket, PERMISSIONS);
     printf("sent command %s\n", c->cmd);
     sleep(1);
@@ -132,6 +206,8 @@ int main()
     /*-----------------------------------------*/
     int id = 2, port = 6062, permissions = ~(1<<8);
     PERMISSIONS = permissions;
+    ID = id;
+    // PERMISSIONS ^= RED; // disable read permission
     char path[] = "/home/bassam/Desktop/FP/Storage Server/src";
     /*-----------------------------------------*/
     

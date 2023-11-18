@@ -20,6 +20,40 @@ void access_path(entry * e)
     fclose(fp);
 }
 
+void SS_copy(int port, command *c)
+{
+    // connect to SS listening on port 
+    int network_socket;
+    network_socket = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in server_address;
+    server_address.sin_family = AF_INET;
+    server_address.sin_addr.s_addr = INADDR_ANY;
+    server_address.sin_port = htons(port);
+    int connection_status;
+    if(connection(&network_socket, &server_address, &connection_status))
+    {
+        printf("Error in connection to server listening on port %d\n", port); return;
+    }
+    // 
+    c->client = SUDOC;
+    send_command(network_socket, c);
+    str path = calloc(MAX_PATH_SIZE, sizeof(char));
+    strcpy(path, c->argv[2]);
+    if(stringcmp(c->argv[1], "-f"))
+    {
+        int x = MKFIL;
+        send(x, PARAMS(x));
+        send_file(network_socket, path);
+    }
+    else
+    {
+        send_directory(path, network_socket);
+    }
+    free(path);
+    int END_CONNECTION = 2504;
+    send(network_socket, PARAMS(END_CONNECTION));
+}
+
 void * NM_alive(void * args) // sends a packet every 1 second to show its still connected
 {
     int socket = *(int *)args;
@@ -46,6 +80,12 @@ void * NM_handler(void * args)
         command *c = malloc(sizeof(command));
         recv_command(socket, c);
         printf("SS%d recieved command from NM in socket :%d, cmd :%s \n",ID, socket, c->cmd);
+        if(stringcmp(c->argv[0], "copy"))
+        {
+            SS_copy(c->client, c);
+            free(c);
+            continue;
+        }
         executeCmd(c, socket, PERMISSIONS);
         printf("sent command %s\n", c->cmd);
         free(c);
@@ -75,6 +115,40 @@ int server_entry(int id, int cport, str init_path)
     return network_socket;
 }
 
+void handle_SS(int socket, command *cmd)
+{
+    printf("Reached inside handle_SS for SS%d for cmd %s\n", ID, cmd->cmd);
+    while(1)
+    {
+        int operation = -1;
+        recv(socket, PARAMS(operation));
+        if(operation == MKFIL)
+        {
+            command * c = malloc(sizeof(command));
+            recv_command(socket, c);
+            char full_path[MAX_PATH_SIZE];
+            memset(full_path, 0, sizeof(full_path));
+            snprintf(full_path, sizeof(full_path), "%s/%s", "testdir", c->argv[c->argc-1]);
+            printf("recieved file %s\n", c->argv[c->argc - 1]);
+            recv_file(socket, full_path);
+            free(c);
+        }
+        else if(operation == MKDIR)
+        {
+            command * server_cmd = malloc(sizeof(command));
+            recv_command(socket, server_cmd);
+            char full_path[MAX_PATH_SIZE];
+            snprintf(full_path, sizeof(full_path), "%s/%s", "testdir", server_cmd->argv[2]);
+            memset(server_cmd->argv[2], 0, sizeof(server_cmd->argv[2]));
+            strcpy(server_cmd->argv[2], full_path);
+            printf("Recieved directory %s\n", server_cmd->argv[2]);
+            executeCmd(server_cmd, socket, PERMISSIONS);
+            free(server_cmd);
+        }
+        else break;
+    }
+}
+
 void * handle_client(void * args)
 {
     // client gave some command of the form [OPN] [PATH]
@@ -82,9 +156,16 @@ void * handle_client(void * args)
     int socket = *(int *)args;
     command *c = malloc(sizeof(command));
     recv_command(socket, c);
+    if(c->client == SUDOC)
+    {
+        handle_SS(socket, c);
+        free(args);
+        close(socket);
+        return;
+    }
     printf("SS%d recieved command from socket :%d, client : %d, %s \n",ID, socket,c->client, c->cmd);
     executeCmd(c, socket, PERMISSIONS);
-    printf("sent command %s\n", c->cmd);
+    printf("recieved command %s\n", c->cmd);
     sleep(1);
     free(args);
     close(socket);

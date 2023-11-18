@@ -11,6 +11,9 @@
 #define MAX_INPUT_SIZE 5000 
 #define MAX_WORDS   512
 #define CACHE_SIZE 5
+#define MKDIR   1
+#define MKFIL   2
+#define SUDOC  -1 // sudo client (actually a server)
 
 #define CRT     (1 << 1)
 #define DLT     (1 << 2)
@@ -19,3 +22,6 @@
 #define WRT     (1 << 5)
 #define RED     (1 << 6)
 #define INF     (1 << 7)
+#define MASTER  (CRT|DLT|CPY|MOV|WRT|RED|INF) // master permissions
+
+#define NOT     !

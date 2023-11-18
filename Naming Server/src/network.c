@@ -1,5 +1,6 @@
 // network.c
 #include "../inc/network.h"
+#include <stdlib.h>
 
 //entry EMPTY_ENTRY;
 
@@ -121,4 +122,64 @@ void send_ACK(int socket, int code)
 void recv_ACK(int socket)
 {
     return;
+}
+
+void create_command(command *c, str path) // used to make directories while copying
+{
+    c->argc = 3;
+    c->client = SUDOC; 
+    memset(c->cmd, 0, sizeof(c->cmd));
+    strcpy(c->cmd, "create -d {path_here}");
+    int i=0;
+    for(;i < c->argc; i++)
+    {
+        memset(c->argv[i], 0, sizeof(c->argv[i]));
+    }
+    strcpy(c->argv[0], "create");
+    strcpy(c->argv[1], "-d");
+    strcpy(c->argv[2], path);
+}
+
+
+void send_file(int client_socket, str path) {
+
+    FILE *file;
+    char buffer[MAX_ENTRIES];
+    memset(buffer, 0, sizeof(buffer));
+    int bytes_read;
+
+    file = fopen(path, "r");
+    if (file == NULL) {
+        perror("File open error");
+        exit(1);
+    }
+
+    while ((bytes_read = fread(buffer, 1, MAX_ENTRIES, file)) > 0) {
+        if (send(client_socket, SPARAM(buffer)) == -1) {
+            perror("Send error");
+            exit(1);
+        }
+        printf("Sending path %s from buffer %s x\n", path, buffer);
+    }
+    printf("%d bytes sent\n", bytes_read);
+    fclose(file);
+}
+
+void recv_file(int socket, str path) {
+    printf("PATH :%s\n", path);
+    FILE *file;
+    char buffer[MAX_ENTRIES];
+    int bytes_received;
+    file = fopen(path, "w");
+    if (file == NULL) {
+        perror("File open error");
+        exit(1);
+    }
+
+    while ((bytes_received = recv(socket, SPARAM(buffer))) > 0) {
+        printf("buffer: %s\n", buffer);
+        fwrite(buffer, 1, bytes_received, file);
+    }
+    printf("%d recv\n", bytes_received);
+    fclose(file);
 }

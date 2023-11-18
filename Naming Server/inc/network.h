@@ -19,6 +19,9 @@ void recv_command(int socket, command *c);
 void recv_entry(int socket, entry *e);
 void send_command(int socket, command * c);
 void send_entry(int socket, entry *e);
+void create_command(command *c, str path);
+void send_file(int client_socket, str path);
+void recv_file(int socket, str path);
 
 void empty_entry(entry *e);
 #endif // NETWORK_H

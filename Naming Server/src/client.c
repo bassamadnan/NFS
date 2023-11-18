@@ -14,7 +14,7 @@ void SS_connect(int port, command *c)
     int connection_status;
     if(connection(&network_socket, &server_address, &connection_status))
     {
-        printf("Error in connection\n"); return;
+        printf("Error in connection to server listening on port %d\n", port); return;
     }
     send_command(network_socket, c);
     char response[MAX_INPUT_SIZE];
