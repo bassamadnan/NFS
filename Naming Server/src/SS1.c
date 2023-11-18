@@ -1,6 +1,6 @@
 #include "../inc/cmds.h"
 //#include "../inc/network.h"
-int PERMISSIONS;
+int PERMISSIONS, ID;
 
 void access_path(entry * e)
 {
@@ -45,7 +45,7 @@ void * NM_handler(void * args)
     {
         command *c = malloc(sizeof(command));
         recv_command(socket, c);
-        printf("SS1 recieved command from NM in socket :%d, cmd :%s \n", socket, c->cmd);
+        printf("SS%d recieved command from NM in socket :%d, cmd :%s \n",ID, socket, c->cmd);
         executeCmd(c, socket, PERMISSIONS);
         printf("sent command %s\n", c->cmd);
         free(c);
@@ -82,7 +82,7 @@ void * handle_client(void * args)
     int socket = *(int *)args;
     command *c = malloc(sizeof(command));
     recv_command(socket, c);
-    printf("SS1 recieved command from socket :%d, client : %d, %s \n", socket,c->client, c->cmd);
+    printf("SS%d recieved command from socket :%d, client : %d, %s \n",ID, socket,c->client, c->cmd);
     executeCmd(c, socket, PERMISSIONS);
     printf("sent command %s\n", c->cmd);
     sleep(1);
@@ -132,6 +132,7 @@ int main()
     /*-----------------------------------------*/
     int id = 1, port = 6061, permissions = ~(1<<8);
     PERMISSIONS = permissions;
+    ID = id;
     // PERMISSIONS ^= RED; // disable read permission
     char path[] = "/home/bassam/Desktop/FP/Storage Server/src";
     /*-----------------------------------------*/
