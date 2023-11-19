@@ -43,6 +43,7 @@ void SS_copy(int port, command *c)
     {
         int x = MKFIL;
         send(x, PARAMS(x));
+        send_command(network_socket, c);
         send_file(network_socket, path);
     }
     else

@@ -116,10 +116,9 @@ int server_entry(int id, int cport, str init_path)
     return network_socket;
 }
 
-void handle_SS(int socket)
+void handle_SS(int socket, command *cmd) // destination SS
 {
-    command *c = malloc(sizeof(command));
-    recv_command(socket, c);
+    printf("Reached inside handle_SS for SS%d for cmd %s\n", ID, cmd->argv[cmd->argc - 1]);
     while(1)
     {
         int operation = -1;
@@ -128,13 +127,22 @@ void handle_SS(int socket)
         {
             command * c = malloc(sizeof(command));
             recv_command(socket, c);
-            recv_file(socket, c->argv[c->argc - 2]);
+            char full_path[MAX_PATH_SIZE];
+            memset(full_path, 0, sizeof(full_path));
+            snprintf(full_path, sizeof(full_path), "%s/%s", cmd->argv[cmd->argc - 1], c->argv[c->argc-1]);
+            printf("recieved file %s\n", c->argv[c->argc - 1]);
+            recv_file(socket, full_path);
             free(c);
         }
         else if(operation == MKDIR)
         {
             command * server_cmd = malloc(sizeof(command));
             recv_command(socket, server_cmd);
+            char full_path[MAX_PATH_SIZE];
+            snprintf(full_path, sizeof(full_path), "%s/%s", cmd->argv[cmd->argc - 1], server_cmd->argv[2]);
+            memset(server_cmd->argv[2], 0, sizeof(server_cmd->argv[2]));
+            strcpy(server_cmd->argv[2], full_path);
+            printf("Recieved directory %s\n", server_cmd->argv[2]);
             executeCmd(server_cmd, socket, PERMISSIONS);
             free(server_cmd);
         }
