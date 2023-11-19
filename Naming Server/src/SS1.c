@@ -1,6 +1,6 @@
 #include "../inc/cmds.h"
 //#include "../inc/network.h"
-int PERMISSIONS, ID;
+int PERMISSIONS, ID, PORT;
 
 void access_path(entry * e)
 {
@@ -88,7 +88,7 @@ void * NM_handler(void * args)
         command *c = malloc(sizeof(command));
         recv_command(socket, c);
         printf("SS%d recieved command from NM in socket :%d, cmd :%s \n",ID, socket, c->cmd);
-        if(stringcmp(c->argv[0], "copy"))
+        if(stringcmp(c->argv[0], "copy") && c->client != PORT)
         {
             SS_copy(c->client, c);
             free(c);
@@ -222,7 +222,8 @@ int main()
 
     /*-----------------------------------------*/
     int id = 1, port = 6061, permissions = (1<<9) - 1;
-    PERMISSIONS = permissions ^ (CPY);
+    PERMISSIONS = permissions;
+    PORT = port;
 
     ID = id;
     // PERMISSIONS ^= RED; // disable read permission
