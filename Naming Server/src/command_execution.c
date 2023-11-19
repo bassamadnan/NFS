@@ -21,7 +21,6 @@ void copyDir(int socket, str path)
     printf("Sending %s\n", c->argv[2]);
     send_command(socket, c);
     printf("Sent %s\n", c->argv[2]);
-
     free(c);
 }
 

@@ -144,8 +144,7 @@ void create_command(command *c, str path) // used to make directories while copy
 void send_file(int client_socket, str path) {
 
     FILE *file;
-    char buffer[MAX_ENTRIES];
-    memset(buffer, 0, sizeof(buffer));
+    char buffer[BUFFER_SIZE];
     int bytes_read;
 
     file = fopen(path, "r");
@@ -153,33 +152,37 @@ void send_file(int client_socket, str path) {
         perror("File open error");
         exit(1);
     }
-
-    while ((bytes_read = fread(buffer, 1, MAX_ENTRIES, file)) > 0) {
-        if (send(client_socket, SPARAM(buffer)) == -1) {
+    int x= 0;
+    while ((bytes_read = fread(buffer, 1, BUFFER_SIZE, file)) > 0) {
+        if (send(client_socket, buffer, bytes_read, 0) == -1) {
             perror("Send error");
             exit(1);
         }
-        printf("Sending path %s from buffer %s x\n", path, buffer);
+        x += bytes_read;
+        printf("Sent buffer: %s x\n", buffer);
+        recv(client_socket, PARAMS(x)); // ack
     }
-    printf("%d bytes sent\n", bytes_read);
+    printf("%d bytes sent\n", x);
     fclose(file);
 }
 
 void recv_file(int socket, str path) {
     printf("PATH :%s\n", path);
+    writeToFile(path, "");
     FILE *file;
-    char buffer[MAX_ENTRIES];
-    int bytes_received;
+    char buffer[BUFFER_SIZE];
+    int bytes_received, x= 0;
     file = fopen(path, "w");
     if (file == NULL) {
         perror("File open error");
         exit(1);
     }
 
-    while ((bytes_received = recv(socket, SPARAM(buffer))) > 0) {
-        printf("buffer: %s\n", buffer);
+    while ((bytes_received = recv(socket, buffer, BUFFER_SIZE, 0)) > 0) {
+        // printf("recved:%d , buffer: %s x\n",bytes_received, buffer);
         fwrite(buffer, 1, bytes_received, file);
+        send(socket, PARAMS(x));
+        x += bytes_received;
     }
-    printf("%d recv\n", bytes_received);
     fclose(file);
 }
