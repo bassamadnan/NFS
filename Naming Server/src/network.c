@@ -49,15 +49,16 @@ void recv_command(int socket, command *c)
 
 void recv_entry(int socket, entry *e)
 {
-    int id, cport, nmport, entries;
+    int id, cport, nmport, entries, permissions;
     char IP[IP_SIZE];
     recv(socket, PARAMS(id));
     recv(socket, PARAMS(cport));
     recv(socket, PARAMS(nmport));
     recv(socket, PARAMS(entries));
+    recv(socket, PARAMS(permissions));
     memset(e->ip, 0, sizeof(e->ip));
     int x = recv(socket, IP, sizeof(IP), 0);
-    e->id = id; e->cport = cport; e->nmport = nmport; e->entries = entries;
+    e->id = id; e->cport = cport; e->nmport = nmport; e->entries = entries; e->permissions = permissions;
     strcpy(e->ip, IP);
     send(socket, PARAMS(x));
     for(int i=0; i<entries; i++)
@@ -89,13 +90,14 @@ void send_command(int socket, command * c)
 }
 void send_entry(int socket, entry *e)
 {
-    int id = e->id, cport = e->cport, nmport = e->nmport, entries = e->entries;
+    int id = e->id, cport = e->cport, nmport = e->nmport, entries = e->entries, permissions = e->permissions;
     char IP[IP_SIZE];
     strcpy(IP, e->ip);
     send(socket, PARAMS(id));
     send(socket, PARAMS(cport));
     send(socket, PARAMS(nmport));
     send(socket, PARAMS(entries));
+    send(socket, PARAMS(permissions));
     int x = send(socket, SPARAM(IP));
     recv(socket, PARAMS(x)); // ack
     for(int i=0; i<entries; i++)

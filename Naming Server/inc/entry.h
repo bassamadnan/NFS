@@ -8,6 +8,7 @@ typedef struct entry
     int cport;
     int nmport;
     int entries;
+    int permissions;
     char paths[MAX_ENTRIES][MAX_PATH_SIZE];
 }entry;
 

@@ -17,6 +17,7 @@ void SS_connect(int port, command *c)
         printf("Error in connection to server listening on port %d\n", port); return;
     }
     send_command(network_socket, c);
+    if(!(stringcmp(c->argv[0], "read") || stringcmp(c->argv[0], "getinfo"))) return;
     char response[MAX_INPUT_SIZE];
     memset(response, 0, sizeof(response));
     int x = recv(network_socket, response, sizeof(response), 0);
@@ -41,7 +42,6 @@ void *clienthread(void * args)
         command c = parser(network_socket);
         send_command(network_socket, &c);
         if(privileged_cmd(&c)) continue; // wait for ACK just conitnue for now
-        printf("reaching here\n");
         entry *e = malloc(sizeof(entry)); // free this later !!
         empty_entry(e);
         recv_entry(network_socket, e);

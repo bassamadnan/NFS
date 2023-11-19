@@ -122,6 +122,7 @@ int server_entry(int id, int cport, str init_path)
     strcpy(e.ip, "000.000.010.000");
     e.nmport = NM_SERVER_PORT;  // communication to the NM via the 6060 port
     access_path(&e);  // read all paths from generate.txt, send it to NM
+    e.permissions = PERMISSIONS;
     send_entry(network_socket, &e);
     return network_socket;
 }
@@ -222,7 +223,7 @@ int main()
 
 
     /*-----------------------------------------*/
-    int id = 2, port = 6062, permissions = ~(1<<8);
+    int id = 2, port = 6062, permissions = (1<<9) - 1;
     PERMISSIONS = permissions;
     ID = id;
     // PERMISSIONS ^= RED; // disable read permission

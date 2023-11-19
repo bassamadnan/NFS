@@ -96,6 +96,11 @@ void * client_function(int * x)
                 int id2 = find_SS(c->argv[c->argc - 2], 0); // src
                 if(!(check_SS(id1) && check_SS(id2))) continue; // error code here
                 c->client = entries[id1].cport;
+                if((entries[id2].permissions & CPY) == 0)
+                {
+                    printf("Copy not allowed for requested SS%d\n", id2);
+                    continue;
+                }
                 NM_connect(id2, c);
                 // SSid1 sends data to SSid2 (acts as client?)
                 
@@ -148,7 +153,7 @@ void server_function(int * x)
     empty_entry(e);
     recv_entry(SS_socket, e);
     int i = 0;
-    printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s from thread: 1\n", e->id, e->entries, e->cport, e->nmport, e->ip);
+    printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s perms: %d\n", e->id, e->entries, e->cport, e->nmport, e->ip, e->permissions);
     entries[e->id] = *e;
 
     SS_stat[e->id] = (serverstat){

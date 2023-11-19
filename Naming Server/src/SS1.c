@@ -43,8 +43,15 @@ void SS_copy(int port, command *c)
     {
         int x = MKFIL;
         send(network_socket, PARAMS(x));
-        send_command(network_socket, c);
+        str temp_path = calloc(MAX_PATH_SIZE, sizeof(char));
+        // target location c->argv[3]
+        create_path(temp_path, path);
+        command *temp_cmd = malloc(sizeof(command));
+        create_command(temp_cmd, temp_path);
+        send_command(network_socket, temp_cmd);
         send_file(network_socket, path);
+        free(temp_path);
+        free(temp_cmd);
     }
     else if(stringcmp(c->argv[1], "-d"))
     {
@@ -112,6 +119,7 @@ int server_entry(int id, int cport, str init_path)
     strcpy(e.ip, "000.000.010.000");
     e.nmport = NM_SERVER_PORT;  // communication to the NM via the 6060 port
     access_path(&e);  // read all paths from generate.txt, send it to NM
+    e.permissions = PERMISSIONS;
     send_entry(network_socket, &e);
     return network_socket;
 }
@@ -213,8 +221,9 @@ int main()
 
 
     /*-----------------------------------------*/
-    int id = 1, port = 6061, permissions = ~(1<<8);
-    PERMISSIONS = permissions;
+    int id = 1, port = 6061, permissions = (1<<9) - 1;
+    PERMISSIONS = permissions ^ (CPY);
+
     ID = id;
     // PERMISSIONS ^= RED; // disable read permission
     char path[] = "/home/bassam/Desktop/FP/Storage Server/src";

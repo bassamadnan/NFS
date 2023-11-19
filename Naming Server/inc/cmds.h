@@ -5,6 +5,9 @@
 #include "network.h"
 #include "file_operations.h"
 #include "command_execution.h"
+#include "redundancy.h"
+
+
 int stringcmp(const str s1, const str s2) {
     return !strcmp(s1, s2);
 }
