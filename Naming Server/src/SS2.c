@@ -159,7 +159,7 @@ void * handle_client(void * args)
     recv_command(socket, c);
     if(c->client == -1)
     {
-        handle_SS(socket);
+        handle_SS(socket, c);
         free(args);
         close(socket);
         return;
