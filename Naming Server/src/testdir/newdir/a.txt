@@ -1,1 +1,1 @@
-testnew content
+some new file content

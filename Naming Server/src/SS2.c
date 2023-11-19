@@ -38,13 +38,21 @@ void SS_copy(int port, command *c)
     c->client = SUDOC;
     send_command(network_socket, c);
     str path = calloc(MAX_PATH_SIZE, sizeof(char));
+
     strcpy(path, c->argv[2]);
     if(stringcmp(c->argv[1], "-f"))
     {
         int x = MKFIL;
-        send(x, PARAMS(x));
-        send_command(network_socket, c);
+        send(network_socket, PARAMS(x));
+        str temp_path = calloc(MAX_PATH_SIZE, sizeof(char));
+        // target location c->argv[3]
+        create_path(temp_path, path);
+        command *temp_cmd = malloc(sizeof(command));
+        create_command(temp_cmd, temp_path);
+        send_command(network_socket, temp_cmd);
         send_file(network_socket, path);
+        free(temp_path);
+        free(temp_cmd);
     }
     else
     {
@@ -53,6 +61,8 @@ void SS_copy(int port, command *c)
     free(path);
     int END_CONNECTION = 2504;
     send(network_socket, PARAMS(END_CONNECTION));
+    printf("Sent end connect\n");
+
 }
 
 void * NM_alive(void * args) // sends a packet every 1 second to show its still connected

@@ -1,6 +1,6 @@
 files.c
 testdir
-testdir/inside
+testdir/newdir
 testdir/inside/b.txt
 testdir/a.txt
 generate

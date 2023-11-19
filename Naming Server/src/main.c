@@ -25,24 +25,6 @@ pthread_t tid[60];
 entry entries[MAX_ENTRIES];
 
 
-
-void trim_path(str path)
-{
-    int len = strlen(path) - 1; 
-    int i=0;
-    for(; i<len + 1; i++)
-    {
-        if(path[i] == '/') break;
-    }
-    if (i == len + 1) return;
-    while(len && (path[len] != '/'))
-    {
-        path[len] = '\0';
-        len--;
-    }
-    if(len) path[len] = '\0';
-}
-
 int find_SS(str full_path, int trim)
 {
     // Finds the SS the command is intended from

@@ -142,7 +142,6 @@ void create_command(command *c, str path) // used to make directories while copy
 
 
 void send_file(int client_socket, str path) {
-
     FILE *file;
     char buffer[BUFFER_SIZE];
     int bytes_read;
@@ -179,6 +178,8 @@ void send_file(int client_socket, str path) {
 
 void recv_file(int socket, str path) {
     FILE *file;
+    writeToFile(path, "");
+    
     char buffer[BUFFER_SIZE];
     int bytes_received, x= 0;
     file = fopen(path, "w");

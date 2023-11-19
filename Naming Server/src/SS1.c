@@ -42,11 +42,11 @@ void SS_copy(int port, command *c)
     if(stringcmp(c->argv[1], "-f"))
     {
         int x = MKFIL;
-        send(x, PARAMS(x));
+        send(network_socket, PARAMS(x));
         send_command(network_socket, c);
         send_file(network_socket, path);
     }
-    else
+    else if(stringcmp(c->argv[1], "-d"))
     {
         send_directory(path, network_socket);
     }
@@ -119,9 +119,9 @@ int server_entry(int id, int cport, str init_path)
 void handle_SS(int socket, command *cmd) // destination SS
 {
     printf("Reached inside handle_SS for SS%d for cmd %s\n", ID, cmd->argv[cmd->argc - 1]);
+    int operation = -1;
     while(1)
     {
-        int operation = -1;
         recv(socket, PARAMS(operation));
         if(operation == MKFIL)
         {
@@ -148,6 +148,7 @@ void handle_SS(int socket, command *cmd) // destination SS
         }
         else break;
     }
+    printf("broke at %d\n", operation);
 }
 
 void * handle_client(void * args)
