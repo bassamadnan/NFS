@@ -218,7 +218,6 @@ int main()
     // PERMISSIONS ^= RED; // disable read permission
     char path[] = "/home/bassam/Desktop/FP/Storage Server/src";
     /*-----------------------------------------*/
-    
     int nm_sock = server_entry(id, port, path);
     pthread_t clnt, serv, nm;
     pthread_create(&serv, 0, NM_alive, &nm_sock);

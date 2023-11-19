@@ -1,3 +1,4 @@
 newdir
 newdir/a.c
 a.c
+newdir/a.txt

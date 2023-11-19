@@ -154,21 +154,30 @@ void send_file(int client_socket, str path) {
     }
     int x= 0;
     while ((bytes_read = fread(buffer, 1, BUFFER_SIZE, file)) > 0) {
+        // if (send(client_socket, buffer, bytes_read, 0) == -1) {
+        //     perror("Send error");
+        //     exit(1);
+        // }
+        x += bytes_read;
+    }
+    int z;
+    send(client_socket, PARAMS(x));
+    recv(client_socket, PARAMS(z));
+    printf("sent %d bytes\n", z);
+    bytes_read = 0;
+    memset(buffer, 0, sizeof(buffer));
+    fseek(file, 0, SEEK_SET);
+    while ((bytes_read = fread(buffer, 1, BUFFER_SIZE, file)) > 0) {
         if (send(client_socket, buffer, bytes_read, 0) == -1) {
             perror("Send error");
             exit(1);
         }
-        x += bytes_read;
-        printf("Sent buffer: %s x\n", buffer);
-        recv(client_socket, PARAMS(x)); // ack
+        memset(buffer, 0, sizeof(buffer));
     }
-    printf("%d bytes sent\n", x);
     fclose(file);
 }
 
 void recv_file(int socket, str path) {
-    printf("PATH :%s\n", path);
-    writeToFile(path, "");
     FILE *file;
     char buffer[BUFFER_SIZE];
     int bytes_received, x= 0;
@@ -177,11 +186,14 @@ void recv_file(int socket, str path) {
         perror("File open error");
         exit(1);
     }
+    int y;
+    recv(socket, PARAMS(y));
+    send(socket, PARAMS(y));
+    printf("expecting %d bytes\n", y);
 
-    while ((bytes_received = recv(socket, buffer, BUFFER_SIZE, 0)) > 0) {
+    while (x < y && (bytes_received = recv(socket, buffer, 1, 0)) > 0) {
         // printf("recved:%d , buffer: %s x\n",bytes_received, buffer);
         fwrite(buffer, 1, bytes_received, file);
-        send(socket, PARAMS(x));
         x += bytes_received;
     }
     fclose(file);
