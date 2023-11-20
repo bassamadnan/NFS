@@ -109,40 +109,40 @@ int getFileInfo(const char *filename, char *infoBuffer, size_t bufferSize) {
         return 2; // Return 2 to indicate a buffer overflow error
     }
 }
-
-int readFile(const char *filename, char **buffer, size_t *size) {
+int readFile(const char *path, int client_socket) {
     // // sem_wait(&clientLock);
-    FILE *file = fopen(filename, "r");
-    
+     FILE *file;
+    char buffer[BUFFER_SIZE];
+    int bytes_read;
+
+    file = fopen(path, "r");
     if (file == NULL) {
-        // sem_post(&clientLock);
-        return 1; // Return error code 1 to indicate file open error
+        perror("File open error");
+        return 1;
     }
-    
-    fseek(file, 0, SEEK_END);
-    *size = ftell(file);
+    int x= 0;
+    while ((bytes_read = fread(buffer, 1, BUFFER_SIZE, file)) > 0) {
+        // if (send(client_socket, buffer, bytes_read, 0) == -1) {
+        //     perror("Send error");
+        //     exit(1);
+        // }
+        x += bytes_read;
+    }
+    int z;
+    send(client_socket, PARAMS(x));
+    recv(client_socket, PARAMS(z));
+    printf("sent %d bytes\n", z);
+    bytes_read = 0;
+    memset(buffer, 0, sizeof(buffer));
     fseek(file, 0, SEEK_SET);
-
-    *buffer = (char *)malloc(*size);
-    
-    if (*buffer == NULL) {
-        fclose(file);
-        // sem_post(&clientLock);
-        return 2; // Return error code 2 to indicate memory allocation error
+    while ((bytes_read = fread(buffer, 1, BUFFER_SIZE, file)) > 0) {
+        if (send(client_socket, buffer, bytes_read, 0) == -1) {
+            perror("Send error");
+            exit(1);
+        }
+        memset(buffer, 0, sizeof(buffer));
     }
-
-    size_t bytesRead = fread(*buffer, 1, *size, file);
-    
-    if (bytesRead != *size) {
-        free(*buffer);
-        fclose(file);
-        // sem_post(&clientLock);
-        return 3; // Return error code 3 to indicate read error
-    }
-    
     fclose(file);
-    // sem_post(&clientLock);
-    return 0; // Return 0 to indicate success
 }
 
 int makeDirectory(const char *path) {

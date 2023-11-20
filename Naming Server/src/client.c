@@ -2,6 +2,22 @@
 
 entry temp;
 
+void read_file(int socket) {
+    
+    char buffer[BUFFER_SIZE];
+    int bytes_received, x= 0;
+    int y;
+    recv(socket, PARAMS(y));
+    send(socket, PARAMS(y));
+    printf("expecting %d bytes\n", y);
+
+    while (x < y && (bytes_received = recv(socket, buffer, 1, 0)) > 0) {
+        // printf("recved:%d , buffer: %s x\n",bytes_received, buffer);
+        printf("%s", buffer);
+        x += bytes_received;
+    }
+    printf("\n");
+}
 
 void SS_connect(int port, command *c)
 {
@@ -17,12 +33,22 @@ void SS_connect(int port, command *c)
         printf("Error in connection to server listening on port %d\n", port); return;
     }
     send_command(network_socket, c);
-    if(!(stringcmp(c->argv[0], "read") || stringcmp(c->argv[0], "getinfo"))) return;
-    char response[MAX_INPUT_SIZE];
-    memset(response, 0, sizeof(response));
-    int x = recv(network_socket, response, sizeof(response), 0);
-    printf("recieved %d response: \n%s\n", x, response);
+    if(!(stringcmp(c->argv[0], "read") || stringcmp(c->argv[0], "getinfo")))
+    {
+        // expect ack
+        ACK *ack = sizeof(ACK);
+        recv_ACK(network_socket, ack);
+        printf("STATUS : id : %d, code :%d, msg: %s x\n", ack->id, ack->code, ack->message);
+        // free(network_socket);
+        return;
+    }
+    if(stringcmp(c->argv[0], "read"))
+    {
+        read_file(network_socket);
+    }
+    // free(network_socket);
 }
+
 
 void *clienthread(void * args)
 {

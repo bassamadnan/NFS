@@ -10,7 +10,10 @@
 typedef struct ACK
 {
     int id;
-}ACK;
+    int code;  
+    char message[MAX_MESSAGE_SIZE];  
+} ACK;
+
 
 int connection(int *socket, struct sockaddr_in *addr, int *stat);
 int msgsend(int *network_socket, char *client_request);
@@ -20,6 +23,8 @@ void recv_entry(int socket, entry *e);
 void send_command(int socket, command * c);
 void send_entry(int socket, entry *e);
 void create_command(command *c, str path);
+void send_ACK(int socket, ACK* ack_packet);
+void recv_ACK(int socket, ACK *ack_packet);
 void send_file(int client_socket, str path);
 void recv_file(int socket, str path);
 

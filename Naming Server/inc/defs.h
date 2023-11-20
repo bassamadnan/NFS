@@ -3,7 +3,7 @@
 #define MAX_NAME_SIZE   1024
 #define MAX_ENTRIES     1024
 #define BUFFER_SIZE 1024
-
+#define MAX_MESSAGE_SIZE 512
 #define str     char*
 #define str_arr char**
 #define PARAMS(x) &x, sizeof(x), 0

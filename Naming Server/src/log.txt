@@ -1,0 +1,39 @@
+ACK ID: -1 | Code: -1 | Message: 
+ACK ID: 1 | Code: 200 | Message: Command executed
+ACK ID: 1 | Code: 200 | Message: Command executed
+ACK ID: 1 | Code: 200 | Message: Command executed
+ACK ID: 1811942736 | Code: 32648 | Message: 
+ACK ID: -671085232 | Code: 32680 | Message: 
+ACK ID: -1 | Code: -1 | Message: 
+ACK ID: 1953391988 | Code: 1 | Message: 
+ACK ID: -1811935920 | Code: 32718 | Message: 
+ACK ID: 1953391988 | Code: 1 | Message: 
+ACK ID: 671092048 | Code: 32552 | Message: 
+ACK ID: 0 | Code: 1953719668 | Message: 
+ACK ID: -603976368 | Code: 32708 | Message: 
+ACK ID: 0 | Code: 1953719668 | Message: 
+ACK ID: 1677725008 | Code: 32554 | Message: 
+ACK ID: 1953391988 | Code: 1 | Message: 
+ACK ID: 1677725008 | Code: 32650 | Message: 
+ACK ID: 1953391988 | Code: 1 | Message: 
+ACK ID: -1342173872 | Code: 32615 | Message: 
+ACK ID: 1953391988 | Code: 1 | Message: 
+ACK ID: -335540912 | Code: 32677 | Message: 
+ACK ID: 0 | Code: 1953719668 | Message: 
+ACK ID: -402649776 | Code: 32671 | Message: 
+ACK ID: 0 | Code: 1953719668 | Message: 
+ACK ID: 671092048 | Code: 32621 | Message: 
+ACK ID: 1953391988 | Code: 1 | Message: 
+ACK ID: 134221136 | Code: 32727 | Message: 
+ACK ID: 0 | Code: 1953719668 | Message: 
+ACK ID: 1 | Code: 200 | Message: Command executed
+ACK ID: 0 | Code: 1953719668 | Message: 
+ACK ID: 1 | Code: 200 | Message: Command executed
+ACK ID: 0 | Code: 1953719668 | Message: 
+ACK ID: 1 | Code: 200 | Message: Command executed
+ACK ID: 0 | Code: 1953719668 | Message: 
+ACK ID: 1 | Code: 200 | Message: Command executed
+ACK ID: 1953719668 | Code: 544695662 | Message: 
+ACK ID: 1 | Code: 200 | Message: Command executed
+ACK ID: 1 | Code: 200 | Message: Command executed
+ACK ID: 1 | Code: 200 | Message: Command executed

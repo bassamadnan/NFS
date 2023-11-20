@@ -176,6 +176,16 @@ void * handle_client(void * args)
     printf("SS%d recieved command from socket :%d, client : %d, %s \n",ID, socket,c->client, c->cmd);
     executeCmd(c, socket, PERMISSIONS);
     printf("recieved command %s\n", c->cmd);
+    if(!(stringcmp(c->argv[0], "read") || stringcmp(c->argv[0], "getinfo")))
+    {
+        ACK *ack  = malloc(sizeof(ACK));
+        ack->code = 200;
+        ack->id = 1;
+        memset(ack->message, 0, sizeof(ack->message));
+        strcpy(ack->message, "Command executed");
+        send_ACK(socket, ack);
+        free(ack);
+    }
     sleep(1);
     free(args);
     close(socket);

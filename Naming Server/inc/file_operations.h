@@ -2,11 +2,8 @@
 #ifndef FILE_OPERATIONS_H
 #define FILE_OPERATIONS_H
 
+#include "defs.h"
 #include <semaphore.h>
-
-#define IP_SIZE 16
-#define MAX_PATH_SIZE 4096
-#define MAX_ENTRIES 1024
 
 #include "entry.h"
 
@@ -17,7 +14,7 @@ int appendToFile(const char *filename, const char *content);
 int deleteFile(const char *filename);
 int moveFile(const char *source, const char *destination);
 int getFileInfo(const char *filename, char *infoBuffer, size_t bufferSize);
-int readFile(const char *filename, char **buffer, size_t *size);
+int readFile(const char *filename, int client_socket);
 int makeDirectory(const char *path);
 int deleteDirectory(const char *path);
 int copyFile(const char *source, const char *destination);

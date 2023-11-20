@@ -23,6 +23,7 @@
         "stdlib.h": "c",
         "lru.h": "c",
         "redundancy.h": "c",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "system_error": "c"
     }
 }

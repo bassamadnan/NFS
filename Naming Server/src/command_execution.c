@@ -204,14 +204,13 @@ int executeCmd(command * cmd, int socket, int PERMISSIONS){
         char *path = cmd->argv[1];
         char *buffer = NULL;
         size_t size = 0;
-        int result = readFile(path, &buffer, &size);
+        int result = readFile(path, socket);
         printf("result stat %d\n", result);
         if (result == 0) {
-            int x = send(socket, buffer, size, 0);
-            printf("sent %d\n", x);
+            // int x = send(socket, buffer, size, 0);
+            // printf("sent %d\n", x);
             free(buffer);
         }
-
         return result;
     }
     else if (strcmp(subcmd, "getinfo") == 0 && (PERMISSIONS & INF)) {
