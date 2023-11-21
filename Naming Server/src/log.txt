@@ -453,3 +453,25 @@ Accepted new server: 6
 Found SS for newdir/z.txt on id: 1, listening on port: 6061, ip: 000.000.010.000
 Accepted new server: 8
 Found SS for newdir/z.txt on id: 1, listening on port: 6061, ip: 000.000.010.000
+Initialized networking threads
+Accepted new server: 4
+Accepted new client: 6
+Found SS for newdir/z.txt on id: 1, listening on port: 6061, ip: 000.000.010.000
+Initialized networking threads
+Accepted new server: 4
+Initialized networking threads
+Accepted new server: 4
+Accepted new client: 6
+Found SS for newdir/z.txt on id: 1, listening on port: 6061, ip: 000.000.010.000
+Initialized networking threads
+Accepted new server: 6
+Initialized networking threads
+Accepted new server: 5
+Accepted new client: 6
+Found SS for newdir/z.txt on id: 1, listening on port: 6061, ip: 000.000.010.000
+Initialized networking threads
+Accepted new server: 5
+Accepted new client: 6
+SS id: 1, port: 6061, ip: 000.000.010.000
+Initialized networking threads
+Accepted new server: 6

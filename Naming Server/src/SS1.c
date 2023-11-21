@@ -1,5 +1,7 @@
 #include "../inc/cmds.h"
 //#include "../inc/network.h"
+
+#include "../inc/error_codes.h"
 #include <dirent.h>
 #include "../inc/hash.h"
 typedef struct HashMap {
@@ -191,7 +193,24 @@ void * NM_handler(void * args)
             initHashMap(&sent_paths);
             continue;
         }
-        executeCmd(c, socket, PERMISSIONS);
+
+        int result = executeCmd(c, socket, PERMISSIONS);
+
+        int fileFlag = 0;
+        for(int i =0; i<c->argc; i++)
+        {
+            if (strcmp(c->argv[i], "-f") == 0)
+            {
+                fileFlag = 1;
+            }
+        }
+        struct index2D ind = inferCode(c->argv[0], result, fileFlag);
+
+        ACK *ack  = malloc(sizeof(ACK));
+        ack->code = ind.col;
+        ack->id = ind.row;
+        send_ACK(socket, ack);
+
         printf("sent command %s\n", c->cmd);
         free(c);
     }
@@ -277,6 +296,68 @@ void handle_SS(int socket, command *cmd) // destination SS
     printf("broke at %d\n", operation);
 }
 
+struct index2D inferCode(const char* cmd, int code, int fileFlag)
+{
+    struct index2D ind;
+
+    int length = 1;
+    while (errorMessage[length][0] != NULL) {
+        length++;
+    }
+
+    if (code < 0) 
+    {
+        ind.row = length-code-1;
+        ind.col = 0;
+        return ind;
+    }
+
+    ind.col = code-1;
+    if (strcmp(cmd, "write") == 0 && fileFlag)
+    {
+        ind.row = 0;
+    }
+    else if (strcmp(cmd, "append"))
+    {
+        ind.row = 1;
+    }
+    else if (strcmp(cmd, "delete") == 0 && fileFlag)
+    {
+        ind.row = 2;
+    }
+    else if(strcmp(cmd, "move") == 0 && fileFlag)
+    {
+        ind.row = 3;
+    }
+    else if(strcmp(cmd, "getinfo") == 0)
+    {
+        ind.row = 4;
+    }
+    else if(strcmp(cmd, "read") == 0)
+    {
+        ind.row = 5;
+    }
+    else if(strcmp(cmd, "create") == 0 && !fileFlag)
+    {
+        ind.row = 6;
+    }
+    else if(strcmp(cmd, "delete") == 0 && !fileFlag)
+    {
+        ind.row = 7;
+    }
+    else if(strcmp(cmd, "copy") == 0 && fileFlag)
+    {
+        ind.row = 8;
+    }
+    else if(strcmp(cmd, "copy") == 0 && !fileFlag)
+    {
+        ind.row = 9;
+    }
+    return ind;
+}
+
+
+
 void * handle_client(void * args)
 {
     // client gave some command of the form [OPN] [PATH]
@@ -292,16 +373,27 @@ void * handle_client(void * args)
         return;
     }
     printf("SS%d recieved command from socket :%d, client : %d, %s \n",ID, socket,c->client, c->cmd);
-    executeCmd(c, socket, PERMISSIONS);
-    printf("recieved command %s\n", c->cmd);
-    if(!(stringcmp(c->argv[0], "read") || stringcmp(c->argv[0], "getinfo")))
+    int result = executeCmd(c, socket, PERMISSIONS);
+
+    int fileFlag = 0;
+    for(int i =0; i<c->argc; i++)
     {
-        ACK *ack  = malloc(sizeof(ACK));
-        ack->code = 200;
-        ack->id = 1;
-        // send_ACK(socket, ack);
-        free(ack);
+        if (strcmp(c->argv[i], "-f") == 0)
+        {
+            fileFlag = 1;
+        }
     }
+    struct index2D ind = inferCode(c->argv[0], result, fileFlag);
+
+    printf("recieved command %s\n", c->cmd);
+    // if(!(stringcmp(c->argv[0], "read") || stringcmp(c->argv[0], "getinfo")))
+    // {
+        ACK *ack  = malloc(sizeof(ACK));
+        ack->code = ind.col;
+        ack->id = ind.row;
+        send_ACK(socket, ack);
+        free(ack);
+    // }
     sleep(1);
     free(args);
     close(socket);

@@ -1,5 +1,23 @@
 #include "../inc/cmds.h"
 
+char* errorMessage[][4] = {
+    {COLOR_RED "Error 201: Failed to open the file" RESET, COLOR_RED "Error 202: Failed to write to the file" RESET, NULL},
+    {COLOR_RED "Error 301: Failed to open the file" RESET, COLOR_RED "Error 302: Failed to append to the file" RESET, NULL},
+    {COLOR_RED "Error 401: Failed to delete the file" RESET, NULL},
+    {COLOR_RED "Error 501: Failed to move the file" RESET, NULL},
+    {COLOR_RED "Error 601: Failed to get information about the file" RESET,COLOR_RED "Error 602: Informaton buffer smaller than expected" RESET, NULL},
+    {COLOR_RED "Error 701: Failed to open the file" RESET, COLOR_RED "Error 702: Failed to allocate memory for reading" RESET, COLOR_RED "Error 703: Failed to read from the file" RESET, NULL},
+    {COLOR_RED "Error 801: Failed to create the directory" RESET, NULL},
+    {COLOR_RED "Error 901: Failed to open the directory" RESET,COLOR_RED "Error 902: Failed to delete a file within" RESET, COLOR_RED "Error 903: Failed to delete the directory" RESET, NULL},
+    {COLOR_RED "Error 111: Failed to open source file" RESET, COLOR_RED "Error 112: Failed to open destination file" RESET, COLOR_RED "Error 113: Failed to copy the content" RESET, NULL},
+    {COLOR_RED "Error 121: Failed to open source directory" RESET, COLOR_RED "Error 122: Failed to copy a sub directory" RESET,  COLOR_RED "Error 123: Failed to copy a file within" RESET, NULL},
+    {COLOR_RED "Error 101: Permission denied" RESET, NULL},
+    {COLOR_RED "Error 102: Invalid command" RESET, NULL},
+    {COLOR_RED "Error 103: Invalid arguments for command" RESET, NULL},
+    {COLOR_RED "Error 104: Insufficient arguments" RESET, NULL},
+    {NULL}
+};
+
 int stringcmp(const str s1, const str s2) {
     return !strcmp(s1, s2);
 }
@@ -84,21 +102,26 @@ void SS_connect(int port, command *c)
         printf("Error in connection to server listening on port %d\n", port); return;
     }
     send_command(network_socket, c);
-    if(!(stringcmp(c->argv[0], "read") || stringcmp(c->argv[0], "getinfo")))
-    {
-        // expect ack
-        ACK *ack = malloc(sizeof(ACK));
-        // recv_ACK(network_socket, ack);
-        printf("STATUS : id : %d, code :%d\n", ack->id, ack->code);
-        // free(network_socket);
+    // if(!(stringcmp(c->argv[0], "read") || stringcmp(c->argv[0], "getinfo")))
+    // {
+    //     // expect ack
+    //     ACK *ack = malloc(sizeof(ACK));
+    //     recv_ACK(network_socket, ack);
+    //     // printf("STATUS : id : %d, code :%d\n", ack->id, ack->code);
+    //     printf("%s\n", errorMessage[ack->id][ack->code]);
+    //     // free(network_socket);
 
-        return;
-    }
-    if(stringcmp(c->argv[0], "read"))
-    {
-        read_file(network_socket);
-    }
+    //     return;
+    // }
+    // if(stringcmp(c->argv[0], "read"))
+    // {
+    //     read_file(network_socket);
+    // }
     // free(network_socket);
+        ACK *ack = malloc(sizeof(ACK));
+        recv_ACK(network_socket, ack);
+        // printf("STATUS : id : %d, code :%d\n", ack->id, ack->code);
+        printf("%s\n", errorMessage[ack->id][ack->code]);
 }
 
 
