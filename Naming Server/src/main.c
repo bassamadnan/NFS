@@ -199,6 +199,10 @@ void server_function(int * x)
     empty_entry(e);
     recv_entry(SS_socket, e);
     check_reconnect(e->id, SS_stat, entries);
+    if(e->id > 2)
+    {
+        create_backup(SS_stat[1].socket, SS_stat[2].socket, e->id, SS_stat);
+    }
     int i = 0;
     printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s perms: %d\n", e->id, e->entries, e->cport, e->nmport, e->ip, e->permissions);
     entries[e->id] = *e;
