@@ -295,9 +295,10 @@ int executeCmd(command * cmd, int socket, int PERMISSIONS){
         }
 
         char *path = cmd->argv[1];
-        char infoBuffer[4096]; 
+        char infoBuffer[500]; 
 
         int result = getFileInfo(path, infoBuffer, sizeof(infoBuffer));
+        printf("Info : %s\n", infoBuffer);
         send(socket, infoBuffer, strlen(infoBuffer), 0);
         return result;
     }

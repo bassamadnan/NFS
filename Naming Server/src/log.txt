@@ -726,3 +726,73 @@ Found SS for newdir/z.txt on id: 1, listening on port: 6061, ip: 000.000.010.000
 Found SS for out.txt on id: 3, listening on port: 6063, ip: 000.000.010.000
 Found SS for newdir/z.txt on id: 1, listening on port: 6061, ip: 000.000.010.000
 Found SS for newdir/z.txt on id: 1, listening on port: 6061, ip: 000.000.010.000
+Initialized networking threads
+Accepted new server: 6
+Accepted new server: 7
+Accepted new server: 8
+Accepted new client: 5
+Found SS for out.txt on id: 3, listening on port: 6063, ip: 000.000.010.000
+Found SS for newdir/z.txt on id: 1, listening on port: 6061, ip: 000.000.010.000
+SS id: 1, port: 6061, ip: 000.000.010.000
+Sent command from SS1 to SS2 (Copy operation)
+SS id: 1, port: 6061, ip: 000.000.010.000
+Sent command from SS1 to SS1 (Copy operation)
+Initialized networking threads
+Accepted new server: 6
+Accepted new server: 7
+Accepted new server: 8
+Accepted new client: 5
+Found SS for newdir/z.txt on id: 1, listening on port: 6061, ip: 000.000.010.000
+Found SS for newdir/b.txt on id: 1, listening on port: 6061, ip: 000.000.010.000
+SS id: 1, port: 6061, ip: 000.000.010.000
+Sent command from SS1 to SS1 (Copy operation)
+SS id: 1, port: 6061, ip: 000.000.010.000
+Sent command from SS1 to SS2 (Copy operation)
+Found SS for newdir/z.txt on id: 1, listening on port: 6061, ip: 000.000.010.000
+Found SS for out.txt on id: 3, listening on port: 6063, ip: 000.000.010.000
+Found SS for newdir/z.txt on id: 1, listening on port: 6061, ip: 000.000.010.000
+Initialized networking threads
+Accepted new server: 6
+Accepted new server: 7
+Accepted new server: 8
+Initialized networking threads
+Accepted new server: 6
+Accepted new server: 7
+Accepted new server: 8
+Initialized networking threads
+Accepted new server: 6
+Accepted new server: 7
+Accepted new server: 8
+Accepted new client: 5
+Found SS for newdir/z.txt on id: 1, listening on port: 6061, ip: 000.000.010.000
+Initialized networking threads
+Accepted new server: 6
+Accepted new server: 7
+Accepted new server: 8
+Initialized networking threads
+Accepted new server: 6
+Accepted new server: 7
+Accepted new server: 8
+Initialized networking threads
+Accepted new server: 6
+Accepted new server: 7
+Accepted new server: 8
+Accepted new client: 5
+Found SS for out.txt on id: 3, listening on port: 6063, ip: 000.000.010.000
+Initialized networking threads
+Accepted new server: 6
+Accepted new server: 7
+Accepted new server: 8
+Initialized networking threads
+Accepted new server: 6
+Accepted new server: 7
+Accepted new server: 8
+Accepted new client: 5
+Found SS for out.txt on id: 3, listening on port: 6063, ip: 000.000.010.000
+Initialized networking threads
+Accepted new server: 6
+Accepted new server: 7
+Accepted new server: 8
+Accepted new client: 5
+Found SS for out.txt on id: 3, listening on port: 6063, ip: 000.000.010.000
+Found SS for out.txt on id: 3, listening on port: 6063, ip: 000.000.010.000

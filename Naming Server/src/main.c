@@ -175,6 +175,11 @@ void * client_function(int * x)
                     printf("Copy not allowed for requested SS%d\n", id2);
                     continue;
                 }
+                if(stringcmp(c->argv[1], "-d"))
+                {
+                    entries[id1].entries++;
+                    strcpy(entries[id1].paths[entries[id1].entries], c->argv[c->argc - 2]);
+                }
                 NM_connect(id2, c);
                 // SSid1 sends data to SSid2 (acts as client?)
                 char log_details[200];
