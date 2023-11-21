@@ -150,7 +150,10 @@ void * NM_handler(void * args)
         free(c);
     }
 }
-
+void send_backup(int socket, entry *e)
+{
+    // send all files in e.paths to SS1
+}
 int server_entry(int id, int cport, str init_path)
 {
     int network_socket;
@@ -172,6 +175,12 @@ int server_entry(int id, int cport, str init_path)
     access_path(&e);  // read all paths from generate.txt, send it to NM
     e.permissions = PERMISSIONS;
     send_entry(network_socket, &e);
+    int create_bkup = 0;
+    recv(network_socket, PARAMS(create_bkup));
+    if(create_bkup)
+    {
+        send_backup(network_socket, &e);
+    }
     return network_socket;
 }
 

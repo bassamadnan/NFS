@@ -48,15 +48,36 @@ void copy_command(int id, command *c)
     strcpy(c->argv[2], temp);
 }
 
-void create_backup(int SS1_socket, int SS2_socket, int id, serverstat *SS_stat)
+void backup_SS1(int id, serverstat *SS_stat)
+{
+    int socket = SS_stat[id].socket; 
+    // create
+}
+
+void create_backup(int id, serverstat *SS_stat)
+{
+    // first create backup in SS1
+    if(SS_stat[1].isalive) backup_SS1(int id, SS_stat);    
+
+}
+
+void init_backup(int SS1_socket, int SS2_socket, int id, serverstat *SS_stat)
 {
     // first time SS connects, make a directory in SS1 and SS2 
-    if(SS_stat[id].backup) return; // if it already had backup its probably reconnecting
+    if(SS_stat[id].backup)
+    {
+        int dont = 0;
+        send(SS_stat[id].socket, PARAMS(dont)); // dont send backup
+        return;
+    }
     command *c = malloc(sizeof(command));
     makedir_command(id, c);
     send_command(SS1_socket, c);
     send_command(SS2_socket, c);
     SS_stat[id].backup = 1;
+    int send_bkup = 1;
+    send(SS_stat[id].backup, PARAMS(send_bkup));
+    create_backup(id, SS_stat);
     free(c);
 }
 
