@@ -298,6 +298,8 @@ int executeCmd(command * cmd, int socket, int PERMISSIONS){
         char infoBuffer[500]; 
 
         int result = getFileInfo(path, infoBuffer, sizeof(infoBuffer));
+        int len = strlen(infoBuffer);
+        send(socket, PARAMS(len));
         printf("Info : %s\n", infoBuffer);
         send(socket, infoBuffer, strlen(infoBuffer), 0);
         return result;

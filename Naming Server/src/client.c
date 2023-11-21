@@ -120,7 +120,9 @@ void SS_connect(int port, command *c)
     {
         char response[MAX_INPUT_SIZE];  
         memset(response, 0, sizeof(response));  
-        int x = recv(network_socket, response, sizeof(response), 0);
+        int sz = 0;
+        recv(network_socket, PARAMS(sz));
+        int x = recv(network_socket, response, sz, 0);
         printf("recieved info: \n%s\n", x, response);
     }
 }
