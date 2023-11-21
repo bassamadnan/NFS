@@ -12,6 +12,7 @@
 #include "hash.h"
 
 int executeCmd(command *cmd, int socket, int PERMISSIONS);
+int check_SS(id);
 int is_directory(const str path);
 void send_directory(const str dir_path, int socket);
 

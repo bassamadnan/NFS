@@ -5,6 +5,7 @@ typedef struct HashMap {
     struct KeyValue* table[MAP_SIZE];
 } map_t;
 
+
 // is this id reconnecting?
 int check_reconnect(int id, serverstat *SS_stat, entry *e)
 {
@@ -12,12 +13,15 @@ int check_reconnect(int id, serverstat *SS_stat, entry *e)
     {
         SS_stat[id].isalive = 1;
         printf("SS%d reconnected\n", id);
+        return 1;
     }
     else
     {
         printf("New connection : SS%d\n", id);
         SS_stat[id].isalive = 1;
         SS_stat[id].socket = 0;
+        SS_stat[id].port = e->cport;
+        return 0;
     }
 }
 
@@ -142,6 +146,19 @@ void generate_command(int id, command *c1, command *c2)
     memset(c2->argv[c2->argc - 1], 0, sizeof(c2->argv[c2->argc - 1]));
     snprintf(c2->argv[c2->argc - 1], sizeof(c2->argv[c2->argc -1]), "SS%d/%s", id, c1->argv[c1->argc - 1]);
 }
+void ping_command(command *c)
+{
+    c->client = 1;
+    memset(c->cmd, 0, sizeof(c->cmd));
+    strcpy(c->cmd, "ping -d {SS_id}");
+    c->argc = 3;
+    memset(c->argv[0], 0, sizeof(c->argv[0]));
+    memset(c->argv[1], 0, sizeof(c->argv[1]));
+    memset(c->argv[2], 0, sizeof(c->argv[3]));
+    strcpy(c->argv[0], "ping");
+    strcpy(c->argv[1], "-d");
+    strcpy(c->argv[2], "temp");
+}
 
 void exec_backup(int id, serverstat *SS_stat , command *c)
 {
@@ -166,4 +183,25 @@ void exec_backup(int id, serverstat *SS_stat , command *c)
         send_command(sket, newcmd);
         free(newcmd);
     }
+}
+
+int read_backup(int id, serverstat *SS_stat, command *c)
+{
+    if(SS_stat[1].isalive)
+    {
+        char temp[MAX_PATH_SIZE - MAX_ENTRIES];
+        strcpy(temp, c->argv[1]);
+        memset(c->argv[c->argc - 1], 0, sizeof(c->argv[c->argc - 1]));
+        snprintf(c->argv[c->argc - 1], sizeof(c->argv[c->argc -1]), "SS%d/%s", id, temp);
+        return 1;
+    }
+    if(SS_stat[2].isalive)
+    {
+        char temp[MAX_PATH_SIZE - MAX_ENTRIES];
+        strcpy(temp, c->argv[1]);
+        memset(c->argv[c->argc - 1], 0, sizeof(c->argv[c->argc - 1]));
+        snprintf(c->argv[c->argc - 1], sizeof(c->argv[c->argc -1]), "SS%d/%s", id,temp);
+        return 2;
+    }
+    return 0;
 }

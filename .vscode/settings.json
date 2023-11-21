@@ -25,6 +25,7 @@
         "redundancy.h": "c",
         "unistd.h": "c",
         "system_error": "c",
-        "pthread.h": "c"
+        "pthread.h": "c",
+        "lock.h": "c"
     }
 }

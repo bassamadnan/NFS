@@ -4,6 +4,22 @@
 #include <sys/syscall.h>
 #include "../inc/hash.h"
 #include "../inc/lru.h"
+void read_file(int socket) {
+    
+    char buffer[BUFFER_SIZE];
+    int bytes_received, x= 0;
+    int y;
+    recv(socket, PARAMS(y));
+    send(socket, PARAMS(y));
+    printf("expecting %d bytes\n", y);
+
+    while (x < y && (bytes_received = recv(socket, buffer, 1, 0)) > 0) {
+        // printf("recved:%d , buffer: %s x\n",bytes_received, buffer);
+        printf("%s", buffer);
+        x += bytes_received;
+    }
+    printf("\n");
+}
 
 int BKUPSS12 = 0;
 int stringcmp(const str s1, const str s2) {
@@ -120,7 +136,7 @@ int find_SS(str full_path, int trim)
 
 }
 
-int check_SS(id)
+int check_SS(int id)
 {
     return SS_stat[id].isalive;
 }
@@ -200,14 +216,29 @@ void * client_function(int * x)
         else{
             printf("Client %d requested for %s\n", client_socket, path);
             printf("Not found\n");
-            return;
+            send_entry(client_socket, &e);
+            continue;
         }
         char log_details[200];
         sprintf(log_details, "Found SS for %s on id: %d, listening on port: %d, ip: %s", path, ss, entries[ss].cport, entries[ss].ip);
         log_network_operation(log_details);
 
         send_entry(client_socket, &e);
-        exec_backup(ss, SS_stat, c);
+        if(stringcmp(c->argv[0], "write") && SS_stat[ss].isalive && ss != 1 && ss != 2 && (entries[ss].permissions & WRT)) exec_backup(ss, SS_stat, c);
+        if(stringcmp(c->argv[0], "read") && !SS_stat[ss].isalive)
+        {
+            int x = read_backup(ss, SS_stat, c);
+            if(x)
+            {
+                send_command(SS_stat[x].socket, c);
+                printf("%d: %s\n", x, c->argv[1]);
+                read_file(SS_stat[x].socket);
+            }
+            else
+            {
+                printf("Backup servers storage down\n");
+            }
+        }
     }
     close(client_socket);
 }
@@ -219,55 +250,49 @@ void server_function(int * x)
     entry *e = malloc(sizeof(entry));
     empty_entry(e);
     recv_entry(SS_socket, e);
-    // if (check_reconnect(e->id, SS_stat, entries))
-    // {
+    int reconnect = check_reconnect(e->id, SS_stat, e);
+    if(!reconnect)
+    {
+        int i = 0;
+        printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s perms: %d\n", e->id, e->entries, e->cport, e->nmport, e->ip, e->permissions);
+        entries[e->id] = *e;
 
-    // }
-    int i = 0;
-    printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s perms: %d\n", e->id, e->entries, e->cport, e->nmport, e->ip, e->permissions);
-    entries[e->id] = *e;
-
-    SS_stat[e->id] = (serverstat){
-        .socket = SS_socket,
-        .isalive = 1,
-        .port = e->cport
-    };
-    if(e->id > 2)
-    {
-        init_backup(e->id, SS_stat);
-    }
-    if(e->id > 2 && (BKUPSS12 == 0))
-    {
-        BKUPSS12 = 1;
-        // init_SS12(SS_stat);
-    }
-    while(i<e->entries)
-    {
-        insert(&ID, e->paths[i], e->id);
-        printf("%s\n", e->paths[i++]);
+        SS_stat[e->id] = (serverstat){
+            .socket = SS_socket,
+            .isalive = 1,
+            .port = e->cport
+        };
+        if(e->id > 2)
+        {
+            init_backup(e->id, SS_stat);
+        }
+        if(e->id > 2 && (BKUPSS12 == 0))
+        {
+            BKUPSS12 = 1;
+            // init_SS12(SS_stat);
+        }
+        while(i<e->entries)
+        {
+            insert(&ID, e->paths[i], e->id);
+            printf("%s\n", e->paths[i++]);
+        }
     }
     
     while(1)
     {
-        // sleep(1);
-        // int x = 0;
-        // recv(SS_socket, PARAMS(x));
-        // printf("Recieved : %d\n", x);
-        // if(!x)
-        // {
-        //     SS_stat[e->id].isalive = 0;
-        //     break;
-        // }
-        //are we not doing this or what
+        int x = 0;
+        recv(SS_socket, PARAMS(x));
+        printf("Recieved : %d\n", x);
+        if(!x)
+        {
+            SS_stat[e->id].isalive = 0;
+            break;
+        }
+        sleep(10);
         
-        //wherever we do this put this logging
-        /*
-        char log_details[200];
-        sprintf(log_details, "Received data from SS with id: %d", e->id);
-        log_network_operation(log_details);
-        */
     }
     close(SS_socket);
+    printf("SS%d disconnected\n", e->id);
 }
 
 void * client_thread(void * args)

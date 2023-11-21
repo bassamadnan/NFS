@@ -22,15 +22,20 @@ char* errorMessage[][4] = {
 struct index2D inferCode(const char* cmd, int code, int fileFlag)
 {
     struct index2D ind;
-
-    int length = 1;
-    while (errorMessage[length][0] != NULL) {
-        length++;
+    if(code == 0)
+    {
+        ind.col = -1;
+        ind.row = -1;
+        return;
     }
+    int length = 15;
+    // while (errorMessage[length][0] != NULL) {
+    //     length++;
+    // }
 
     if (code < 0) 
     {
-        ind.row = length-code-1;
+        ind.row = length+code-1;
         ind.col = 0;
         return ind;
     }

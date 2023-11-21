@@ -10,7 +10,23 @@ typedef struct HashMap {
 map_t sent_paths;
 int PERMISSIONS, ID, PORT;
 entry e;
-
+char* errorMessage[][4] = {
+    {COLOR_RED "Error 201: Failed to open the file" RESET, COLOR_RED "Error 202: Failed to write to the file" RESET, NULL},
+    {COLOR_RED "Error 301: Failed to open the file" RESET, COLOR_RED "Error 302: Failed to append to the file" RESET, NULL},
+    {COLOR_RED "Error 401: Failed to delete the file" RESET, NULL},
+    {COLOR_RED "Error 501: Failed to move the file" RESET, NULL},
+    {COLOR_RED "Error 601: Failed to get information about the file" RESET,COLOR_RED "Error 602: Informaton buffer smaller than expected" RESET, NULL},
+    {COLOR_RED "Error 701: Failed to open the file" RESET, COLOR_RED "Error 702: Failed to allocate memory for reading" RESET, COLOR_RED "Error 703: Failed to read from the file" RESET, NULL},
+    {COLOR_RED "Error 801: Failed to create the directory" RESET, NULL},
+    {COLOR_RED "Error 901: Failed to open the directory" RESET,COLOR_RED "Error 902: Failed to delete a file within" RESET, COLOR_RED "Error 903: Failed to delete the directory" RESET, NULL},
+    {COLOR_RED "Error 111: Failed to open source file" RESET, COLOR_RED "Error 112: Failed to open destination file" RESET, COLOR_RED "Error 113: Failed to copy the content" RESET, NULL},
+    {COLOR_RED "Error 121: Failed to open source directory" RESET, COLOR_RED "Error 122: Failed to copy a sub directory" RESET,  COLOR_RED "Error 123: Failed to copy a file within" RESET, NULL},
+    {COLOR_RED "Error 101: Permission denied" RESET, NULL},
+    {COLOR_RED "Error 102: Invalid command" RESET, NULL},
+    {COLOR_RED "Error 103: Invalid arguments for command" RESET, NULL},
+    {COLOR_RED "Error 104: Insufficient arguments" RESET, NULL},
+    {NULL}
+};
 int stringcmp(const str s1, const str s2) {
     return !strcmp(s1, s2);
 }
@@ -147,14 +163,9 @@ void * NM_alive(void * args) // sends a packet every 1 second to show its still 
     int socket = *(int *)args;
     while(1)
     {
-        // command *c = malloc(sizeof(command));
-        // recv_command(socket, c);
-        // printf("SS1 recieved command from NM on socket : %d, %s \n", socket, c->cmd);
-        // executeCmd(c, socket);
-        // free(c);
-        // int x = 1;
-        // send(socket, PARAMS(x));
-        // sleep(1);
+        int x = 1;
+        send(socket, PARAMS(x));
+        sleep(10);
     }
     close(socket);
 }
@@ -194,8 +205,7 @@ void * NM_handler(void * args)
             continue;
         }
 
-        int result = executeCmd(c, socket, PERMISSIONS);
-
+       int result = executeCmd(c, socket, PERMISSIONS);
         int fileFlag = 0;
         for(int i =0; i<c->argc; i++)
         {
@@ -205,11 +215,9 @@ void * NM_handler(void * args)
             }
         }
         struct index2D ind = inferCode(c->argv[0], result, fileFlag);
-
-        ACK *ack  = malloc(sizeof(ACK));
-        ack->code = ind.col;
-        ack->id = ind.row;
-        send_ACK(socket, ack);
+        if(ind.row == -1 && ind.col == -1) printf("Sucessful execution\n");
+        else
+            printf("%s\n", errorMessage[ind.row][ind.col]);
 
         printf("sent command %s\n", c->cmd);
         free(c);
@@ -299,15 +307,20 @@ void handle_SS(int socket, command *cmd) // destination SS
 struct index2D inferCode(const char* cmd, int code, int fileFlag)
 {
     struct index2D ind;
-
-    int length = 1;
-    while (errorMessage[length][0] != NULL) {
-        length++;
+    if(code == 0)
+    {
+        ind.col = -1;
+        ind.row = -1;
+        return ind;
     }
+    int length = 15;
+    // while (errorMessage[length][0] != NULL) {
+    //     length++;
+    // }
 
     if (code < 0) 
     {
-        ind.row = length-code-1;
+        ind.row = length+code-1;
         ind.col = 0;
         return ind;
     }
@@ -374,7 +387,6 @@ void * handle_client(void * args)
     }
     printf("SS%d recieved command from socket :%d, client : %d, %s \n",ID, socket,c->client, c->cmd);
     int result = executeCmd(c, socket, PERMISSIONS);
-
     int fileFlag = 0;
     for(int i =0; i<c->argc; i++)
     {
@@ -384,16 +396,9 @@ void * handle_client(void * args)
         }
     }
     struct index2D ind = inferCode(c->argv[0], result, fileFlag);
-
-    printf("recieved command %s\n", c->cmd);
-    // if(!(stringcmp(c->argv[0], "read") || stringcmp(c->argv[0], "getinfo")))
-    // {
-        ACK *ack  = malloc(sizeof(ACK));
-        ack->code = ind.col;
-        ack->id = ind.row;
-        send_ACK(socket, ack);
-        free(ack);
-    // }
+    if(ind.row == -1 && ind.col == -1) printf("Sucessful execution\n");
+    else
+        printf("%s\n", errorMessage[ind.row][ind.col]);
     sleep(1);
     free(args);
     close(socket);

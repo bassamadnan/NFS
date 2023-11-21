@@ -102,26 +102,27 @@ void SS_connect(int port, command *c)
         printf("Error in connection to server listening on port %d\n", port); return;
     }
     send_command(network_socket, c);
-    // if(!(stringcmp(c->argv[0], "read") || stringcmp(c->argv[0], "getinfo")))
-    // {
-    //     // expect ack
-    //     ACK *ack = malloc(sizeof(ACK));
-    //     recv_ACK(network_socket, ack);
-    //     // printf("STATUS : id : %d, code :%d\n", ack->id, ack->code);
-    //     printf("%s\n", errorMessage[ack->id][ack->code]);
-    //     // free(network_socket);
-
-    //     return;
-    // }
-    // if(stringcmp(c->argv[0], "read"))
-    // {
-    //     read_file(network_socket);
-    // }
-    // free(network_socket);
-        ACK *ack = malloc(sizeof(ACK));
-        recv_ACK(network_socket, ack);
+    if(!(stringcmp(c->argv[0], "read") || stringcmp(c->argv[0], "getinfo")))
+    {
+        // // expect ack
+        // ACK *ack = malloc(sizeof(ACK));
+        // recv_ACK(network_socket, ack);
         // printf("STATUS : id : %d, code :%d\n", ack->id, ack->code);
-        printf("%s\n", errorMessage[ack->id][ack->code]);
+        // printf("%s\n", errorMessage[ack->id][ack->code]);
+
+        return;
+    }
+    if(stringcmp(c->argv[0], "read"))
+    {
+        read_file(network_socket);
+    }
+    if(stringcmp(c->argv[0], "getinfo"))
+    {
+        char response[MAX_INPUT_SIZE];  
+        memset(response, 0, sizeof(response));  
+        int x = recv(network_socket, response, sizeof(response), 0);
+        printf("recieved info: \n%s\n", x, response);
+    }
 }
 
 
@@ -148,7 +149,7 @@ void *clienthread(void * args)
         recv_entry(network_socket, e);
 
         if(e->id != -1) SS_connect(e->cport, &c);
-        if(e->id == -1) printf("from NM: bad request \n");
+        if(e->id == -1) printf("from NM: bad request, check NM \n");
 
     }
     close(network_socket);

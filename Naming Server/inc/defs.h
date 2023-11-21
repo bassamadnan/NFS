@@ -27,4 +27,3 @@
 #define MASTER  (CRT|DLT|CPY|MOV|WRT|RED|INF) // master permissions
 
 #define NOT     !
-

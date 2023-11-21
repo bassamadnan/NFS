@@ -298,7 +298,7 @@ int executeCmd(command * cmd, int socket, int PERMISSIONS){
         char infoBuffer[4096]; 
 
         int result = getFileInfo(path, infoBuffer, sizeof(infoBuffer));
-        send(cmd->client, infoBuffer, strlen(infoBuffer), 0);
+        send(socket, infoBuffer, strlen(infoBuffer), 0);
         return result;
     }
     else if(strcmp(subcmd, "append") == 0){
