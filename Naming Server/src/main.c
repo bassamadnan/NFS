@@ -5,12 +5,6 @@
 #include "../inc/hash.h"
 #include "../inc/lru.h"
 
-typedef struct severstat
-{
-    int socket; // socket for the NM to communicate with this 
-    int isalive;
-}serverstat;
-
 LRUCache* cache;
 
 
@@ -145,6 +139,7 @@ void * client_function(int * x)
     }
     close(client_socket);
 }
+
 void server_function(int * x)
 {
     int SS_socket = *x;
@@ -152,6 +147,7 @@ void server_function(int * x)
     entry *e = malloc(sizeof(entry));
     empty_entry(e);
     recv_entry(SS_socket, e);
+    check_reconnect(e->id, SS_stat, entries);
     int i = 0;
     printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s perms: %d\n", e->id, e->entries, e->cport, e->nmport, e->ip, e->permissions);
     entries[e->id] = *e;
@@ -202,7 +198,6 @@ void * client_thread(void * args)
     
     while(1)
     {
-
         addr_size = sizeof(serverAddr);
         newSocket = accept(serverSocket, (struct sockaddr*)&serverStorage, &addr_size);
         pthread_t t;
@@ -210,7 +205,6 @@ void * client_thread(void * args)
         *arg = newSocket;
         printf("New Client: %d\n", newSocket);
         pthread_create(&t, NULL, client_function, arg);
-
     }
 }
 
@@ -243,7 +237,6 @@ void * server_thread(void * args)
         printf("New server: %d \n", newSocket);
         pthread_create(&t, NULL, &server_function, arg);
     }
-
 }
 
 

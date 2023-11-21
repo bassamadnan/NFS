@@ -8,6 +8,7 @@
 #include "redundancy.h"
 
 
+
 int stringcmp(const str s1, const str s2) {
     return !strcmp(s1, s2);
 }
@@ -58,5 +59,12 @@ void create_path(str temp_path, str path)
         i++;
     }
 }
+typedef struct severstat
+{
+    int socket; // socket for the NM to communicate with this 
+    int isalive;
+}serverstat;
 
+// void updateEntry();
+void check_reconnect(int id, serverstat *SS_stat, entry *e);
 //#include "hash.h"

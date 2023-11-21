@@ -24,6 +24,7 @@
         "lru.h": "c",
         "redundancy.h": "c",
         "unistd.h": "c",
-        "system_error": "c"
+        "system_error": "c",
+        "pthread.h": "c"
     }
 }
