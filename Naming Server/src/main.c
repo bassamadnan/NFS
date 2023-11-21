@@ -165,6 +165,7 @@ void server_function(int * x)
         insert(&ID, e->paths[i], e->id);
         printf("%s\n", e->paths[i++]);
     }
+    
     while(1)
     {
         // sleep(1);

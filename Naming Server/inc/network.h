@@ -11,7 +11,7 @@ typedef struct ACK
 {
     int id;
     int code;  
-    char message[MAX_MESSAGE_SIZE];  
+    // char message[MAX_MESSAGE_SIZE];  
 } ACK;
 
 

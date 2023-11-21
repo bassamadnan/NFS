@@ -38,8 +38,9 @@ void SS_connect(int port, command *c)
         // expect ack
         ACK *ack = malloc(sizeof(ACK));
         recv_ACK(network_socket, ack);
-        printf("STATUS : id : %d, code :%d, msg: %s x\n", ack->id, ack->code, ack->message);
+        printf("STATUS : id : %d, code :%d\n", ack->id, ack->code);
         // free(network_socket);
+
         return;
     }
     if(stringcmp(c->argv[0], "read"))

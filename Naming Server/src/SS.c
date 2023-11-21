@@ -13,6 +13,7 @@ void access_path(entry * e)
     }
     char line[MAX_PATH_SIZE]; 
     while (fgets(line, sizeof(line), fp) != NULL) {
+        printf("got line:%s\n", line);
         strcpy((*e).paths[i++], line);
         (*e).paths[i-1][strlen((*e).paths[i-1]) - 1] = '\0'; // remove newline 
     }
@@ -181,8 +182,6 @@ void * handle_client(void * args)
         ACK *ack  = malloc(sizeof(ACK));
         ack->code = 200;
         ack->id = 1;
-        memset(ack->message, 0, sizeof(ack->message));
-        strcpy(ack->message, "Command executed");
         send_ACK(socket, ack);
         free(ack);
     }
@@ -222,29 +221,57 @@ void * init_server(void * args)
         pthread_create(&t, NULL, handle_client, arg);
     }
 }
+const int MAX_IP_SIZE = 512;
 
-int main()
-{
-    // every server will have one thread for handling connection with NM,
-    // every server will have one thread for handling connectionS with clients
-    // initialize a connection to the NM (NM listens at port 6060 for SS)
+int main(int argc, char *argv[]) {
+	char IP[MAX_IP_SIZE];
 
+    if (argc != 5) {
+        printf("Usage: %s <ID> <PORT> <PERMISSIONS> <IP>\n", argv[0]);
+        return 1;
+    }
 
-    /*-----------------------------------------*/
-    int id = 1, port = 6061, permissions = (1<<9) - 1;
-    PERMISSIONS = permissions;
-    PORT = port;
-
-    ID = id;
-    // PERMISSIONS ^= RED; // disable read permission
-    char path[] = "/home/bassam/Desktop/FP/Storage Server/src";
-    /*-----------------------------------------*/
+    ID = atoi(argv[1]);
+    PORT = atoi(argv[2]);
+    PERMISSIONS = atoi(argv[3]);
+    strncpy(IP, argv[4], MAX_IP_SIZE - 1);
+    IP[MAX_IP_SIZE - 1] = '\0';
     
-    int nm_sock = server_entry(id, port, path);
+    char path[] = "/home/bassam/Desktop/FP/Storage Server/src";
+
+    // The rest of your code remains unchanged, using ID, PORT, PERMISSIONS, and IP as needed.
+    int nm_sock = server_entry(ID, PORT, path); //IP?
     pthread_t clnt, serv, nm;
-    pthread_create(&serv, 0, NM_alive, &nm_sock);
-    pthread_create(&nm, 0, NM_handler, &nm_sock);
-    pthread_create(&clnt, 0, init_server, &port);
+    pthread_create(&serv, NULL, NM_alive, &nm_sock);
+    pthread_create(&nm, NULL, NM_handler, &nm_sock);
+    pthread_create(&clnt, NULL, init_server, &PORT);
     pthread_join(clnt, NULL);
+
     return 0;
 }
+
+// int main()
+// {
+//     // every server will have one thread for handling connection with NM,
+//     // every server will have one thread for handling connectionS with clients
+//     // initialize a connection to the NM (NM listens at port 6060 for SS)
+
+
+//     /*-----------------------------------------*/
+//     int id = 1, port = 6061, permissions = (1<<9) - 1;
+//     PERMISSIONS = permissions;
+//     PORT = port;
+
+//     ID = id;
+//     // PERMISSIONS ^= RED; // disable read permission
+//     char path[] = "/home/bassam/Desktop/FP/Storage Server/src";
+//     /*-----------------------------------------*/
+    
+//     int nm_sock = server_entry(id, port, path);
+//     pthread_t clnt, serv, nm;
+//     pthread_create(&serv, 0, NM_alive, &nm_sock);
+//     pthread_create(&nm, 0, NM_handler, &nm_sock);
+//     pthread_create(&clnt, 0, init_server, &port);
+//     pthread_join(clnt, NULL);
+//     return 0;
+// }

@@ -123,7 +123,7 @@ void log_ACK(ACK *ack_packet) {
 
     if (log_file != NULL) {
         // Write ACK information to the log file
-        fprintf(log_file, "ACK ID: %d | Code: %d | Message: %s\n", ack_packet->id, ack_packet->code, ack_packet->message);
+        fprintf(log_file, "ACK ID: %d | Code: %d | Message: %s\n", ack_packet->id, ack_packet->code);
         
         // Close the log file
         fclose(log_file);
@@ -134,37 +134,20 @@ void log_ACK(ACK *ack_packet) {
 
 void send_ACK(int socket, ACK* ack_packet) {
     int id = ack_packet->id, code = ack_packet->code;
-    char temp[MAX_MESSAGE_SIZE];
-    memset(temp, 0, sizeof(temp));
-    strcpy(temp, ack_packet->message);
     send(socket, PARAMS(id));
     printf("sent %d\n", id);
     send(socket, PARAMS(code));
     printf("sent %d\n", code);
-
-    int x =  send(socket, SPARAM(temp));
-    recv(socket, PARAMS(x));
-    printf("sent %s\n", temp);
-    // Log the sent ACK
-    log_ACK(ack_packet);
 }
 
 // Function to receive an ACK packet
 void recv_ACK(int socket, ACK *ack_packet) {
-    int id = -1, code = -1; str message = calloc(MAX_MESSAGE_SIZE, sizeof(char));
-    memset(message, 0, sizeof(message));
+    int id = -1, code = -1;
     recv(socket, PARAMS(id));
     printf("got : %d\n", id);
     recv(socket, PARAMS(code));
     printf("got : %d\n", code);
-    int y = recv(socket, SPARAM(message));
-    printf("got : %s\n", message);
-    send(socket, PARAMS(y));
     ack_packet->id = id; ack_packet->code = code;
-    memset(ack_packet->message, 0, sizeof(ack_packet->message));
-    strcpy(ack_packet->message, message);
-    // Log the received ACK
-    log_ACK(ack_packet);
 }
 
 void create_command(command *c, str path) // used to make directories while copying
