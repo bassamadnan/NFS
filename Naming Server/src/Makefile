@@ -1,5 +1,5 @@
 C = gcc
-CFLAGS = -Wall -lpthread
+CFLAGS = -Werror=implicit-function-declaration -lpthread
 
 all: client main SS1 hash redundancy
 

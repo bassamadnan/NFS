@@ -1,6 +1,9 @@
 // network.c
 #include "../inc/network.h"
+#include "../inc/file_operations.h"
+
 #include <stdlib.h>
+#include <sys/socket.h>
 
 //entry EMPTY_ENTRY;
 

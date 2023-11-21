@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-
+#include <sys/socket.h>
 
 int writeToFile(const char *filename, const char *content) {
     // // sem_wait(&clientLock);
