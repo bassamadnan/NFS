@@ -1,0 +1,12 @@
+a
+files.c
+testdir
+testdir/inside
+testdir/inside/b.txt
+testdir/a.txt
+generate
+generate.txt
+search
+search.c
+generate.c
+info.c

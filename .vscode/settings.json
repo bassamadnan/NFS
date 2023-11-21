@@ -1,0 +1,31 @@
+{
+    "files.associations": {
+        "entry.h": "c",
+        "stdio.h": "c",
+        "functional": "c",
+        "cmds.h": "c",
+        "types.h": "c",
+        "fileapi.h": "c",
+        "file_operations.h": "c",
+        "command_execution.h": "c",
+        "commands.h": "c",
+        "defs.h": "c",
+        "hash.h": "c",
+        "syscall.h": "c",
+        "network.h": "c",
+        "string.h": "c",
+        "*.tcc": "c",
+        "string": "c",
+        "unordered_map": "c",
+        "string_view": "c",
+        "streambuf": "c",
+        "dirent.h": "c",
+        "stdlib.h": "c",
+        "lru.h": "c",
+        "redundancy.h": "c",
+        "unistd.h": "c",
+        "system_error": "c",
+        "pthread.h": "c",
+        "lock.h": "c"
+    }
+}

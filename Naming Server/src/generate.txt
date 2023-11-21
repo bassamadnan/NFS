@@ -1,0 +1,15 @@
+files.c
+testdir
+testdir/newdir
+testdir/inside/b.txt
+testdir/a.txt
+generate
+generate.txt
+search.c
+generate.c
+info.c
+a/b.txt
+a/a.txt
+b.txt
+a/a.txt/b
+a.txt

@@ -1,0 +1,14 @@
+generate.txt
+newdir
+newdir/insidedir
+newdir/insidedir/inside.txt
+newdir/insidedir/superin
+newdir/a.c
+newdir/y.txt
+newdir/file.txt
+newdir/z.txt
+newdir/last.txt
+newdir/latest.txt
+newdir/x.txt
+newdir/b.txt
+newdir/file2.txt

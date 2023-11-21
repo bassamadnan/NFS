@@ -1,0 +1,6 @@
+out.txt
+anotherdir
+anotherdir/file1.txt
+anotherdir/file2.txt
+random.txt
+generate.txt
