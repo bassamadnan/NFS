@@ -69,6 +69,15 @@ map_t ID; // maps the entries of an SS to their IDs, insertion find ->logn
 pthread_t tid[60];
 entry entries[MAX_ENTRIES];
 
+void log_network_operation(const char *details) {
+    FILE *fp = fopen("log.txt", "a"); // Open log file in append mode
+    if (fp != NULL) {
+        fprintf(fp, "%s\n", details); // Write details to the log file
+        fclose(fp);
+    } else {
+        printf("Error opening log file!\n");
+    }
+}
 
 int find_SS(str full_path, int trim)
 {
@@ -119,6 +128,9 @@ void NM_connect(int id, command *c)
 {
     int socket = SS_stat[id].socket;
     send_command(socket, c);
+    char log_details[200];
+    sprintf(log_details, "SS id: %d, port: %d, ip: %s", id, SS_stat[id].port, entries[id].ip);
+    log_network_operation(log_details);
 }
 
 void * client_function(int * x)
@@ -148,6 +160,9 @@ void * client_function(int * x)
                 }
                 NM_connect(id2, c);
                 // SSid1 sends data to SSid2 (acts as client?)
+                char log_details[200];
+                sprintf(log_details, "Sent command from SS%d to SS%d (Copy operation)", id2, id1);
+                log_network_operation(log_details);
                 
             }
             if(flag == 2)
@@ -186,6 +201,10 @@ void * client_function(int * x)
             printf("Not found\n");
             return;
         }
+        char log_details[200];
+        sprintf(log_details, "Found SS for %s on id: %d, listening on port: %d, ip: %s", path, ss, entries[ss].cport, entries[ss].ip);
+        log_network_operation(log_details);
+
         send_entry(client_socket, &e);
     }
     close(client_socket);
@@ -229,6 +248,14 @@ void server_function(int * x)
         //     SS_stat[e->id].isalive = 0;
         //     break;
         // }
+        //are we not doing this or what
+        
+        //wherever we do this put this logging
+        /*
+        char log_details[200];
+        sprintf(log_details, "Received data from SS with id: %d", e->id);
+        log_network_operation(log_details);
+        */
     }
     close(SS_socket);
 }
@@ -261,6 +288,10 @@ void * client_thread(void * args)
         *arg = newSocket;
         printf("New Client: %d\n", newSocket);
         pthread_create(&t, NULL, client_function, arg);
+        char log_details[200];
+        sprintf(log_details, "Accepted new client: %d", newSocket);
+        log_network_operation(log_details);
+        
     }
 }
 
@@ -292,12 +323,16 @@ void * server_thread(void * args)
         *arg = newSocket;
         printf("New server: %d \n", newSocket);
         pthread_create(&t, NULL, &server_function, arg);
+        char log_details[200];
+        sprintf(log_details, "Accepted new server: %d", newSocket);
+        log_network_operation(log_details);
     }
 }
 
 
 int main()
 {
+	log_network_operation("Initialized networking threads");
     // sem_init(&clientLock, 0, 10);
     cache = createCache(CACHE_SIZE);
     pthread_t cth, sth;
