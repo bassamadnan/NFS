@@ -24,3 +24,8 @@ int check_reconnect(int id, serverstat *SS_stat, entry *e);
 void init_backup( int id, serverstat *SS_stat);
 void init_SS12(serverstat *SS_stat);
 //#include "hash.h"
+
+#define COLOR_RED     "\x1b[31m"
+#define RESET   "\x1b[0m"
+
+struct index2D inferCode(const char* cmd, int code, int fileFlag);

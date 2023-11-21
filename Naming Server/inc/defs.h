@@ -28,4 +28,3 @@
 
 #define NOT     !
 
-
