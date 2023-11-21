@@ -7,6 +7,7 @@
 typedef struct HashMap {
     struct KeyValue* table[MAP_SIZE];
 } map_t;
+sem_t rwlock;
 map_t sent_paths;
 int PERMISSIONS, ID, PORT;
 entry e;
@@ -270,6 +271,7 @@ void handle_SS(int socket, command *cmd) // destination SS
 {
     printf("Reached inside handle_SS for SS%d for cmd %s\n", ID, cmd->argv[cmd->argc - 1]);
     int operation = -1;
+    sem_wait(&rwlock);
     while(1)
     {
         recv(socket, PARAMS(operation));
@@ -301,6 +303,7 @@ void handle_SS(int socket, command *cmd) // destination SS
         }
         else break;
     }
+    sem_post(&rwlock);
     printf("broke at %d\n", operation);
 }
 
@@ -457,6 +460,8 @@ int main(int argc, char *argv[]) {
     initHashMap(&sent_paths);   
     int nm_sock = server_entry(ID, PORT, path); //IP?
     pthread_t clnt, serv, nm;
+    rw_lock_t rwlockk;
+    rw_lock_init(&rwlockk, &rwlock);
     pthread_create(&serv, NULL, NM_alive, &nm_sock);
     pthread_create(&nm, NULL, NM_handler, &nm_sock);
     pthread_create(&clnt, NULL, init_server, &PORT);

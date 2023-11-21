@@ -5,10 +5,7 @@
 #include "network.h"
 #include "file_operations.h"
 #include "command_execution.h"
-//#include "redundancy.h"
-
-
-
+#include "lock.h"
 
 typedef struct severstat
 {
