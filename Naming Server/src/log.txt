@@ -442,3 +442,14 @@ Accepted new server: 7
 Accepted new server: 8
 Accepted new client: 5
 Found SS for out.txt on id: 3, listening on port: 6063, ip: 000.000.010.000
+Initialized networking threads
+Accepted new server: 4
+Accepted new client: 6
+Found SS for newdir/b.txt on id: 1, listening on port: 6061, ip: 000.000.010.000
+Found SS for newdir/file2.txt on id: 1, listening on port: 6061, ip: 000.000.010.000
+Initialized networking threads
+Accepted new client: 4
+Accepted new server: 6
+Found SS for newdir/z.txt on id: 1, listening on port: 6061, ip: 000.000.010.000
+Accepted new server: 8
+Found SS for newdir/z.txt on id: 1, listening on port: 6061, ip: 000.000.010.000
