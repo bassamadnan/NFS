@@ -19,6 +19,7 @@ typedef struct severstat
 }serverstat;
 
 // void updateEntry();
+void exec_backup(int id, serverstat *SS_stat , command *c);
 int check_reconnect(int id, serverstat *SS_stat, entry *e);
 void init_backup( int id, serverstat *SS_stat);
 void init_SS12(serverstat *SS_stat);

@@ -139,7 +139,7 @@ void * client_function(int * x)
     int client_socket = *x;
     free(x);
     
-    for(;;)
+    while(1)
     {
         command *c = malloc(sizeof(command));
         recv_command(client_socket, c);
@@ -207,6 +207,7 @@ void * client_function(int * x)
         log_network_operation(log_details);
 
         send_entry(client_socket, &e);
+        exec_backup(ss, SS_stat, c);
     }
     close(client_socket);
 }

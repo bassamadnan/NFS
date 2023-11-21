@@ -131,16 +131,16 @@ void create_copy(int SS1_socket, int SS2_socket, int id, entry *e)
 void generate_command(int id, command *c1, command *c2)
 {
     c2->argc = c1->argc;
-    c2->client = c2->client;
+    c2->client = c1->client;
     memset(c2->cmd, 0, sizeof(c2->cmd));
+    strcpy(c2->cmd, c1->cmd);
     for(int i=0; i<c1->argc; i++)
     {
         memset(c2->argv[i], 0, sizeof(c2->argv[i]));
         strcpy(c2->argv[i], c1->argv[i]);
     }
     memset(c2->argv[c2->argc - 1], 0, sizeof(c2->argv[c2->argc - 1]));
-    
-    snprintf(c2->argv[c2->argc - 1], "SS%d/%s", id, c1->argv[c1->argc - 1]);
+    snprintf(c2->argv[c2->argc - 1], sizeof(c2->argv[c2->argc -1]), "SS%d/%s", id, c1->argv[c1->argc - 1]);
 }
 
 void exec_backup(int id, serverstat *SS_stat , command *c)
@@ -149,7 +149,21 @@ void exec_backup(int id, serverstat *SS_stat , command *c)
     if(SS_stat[1].isalive)
     {
         // write <conents> path -> write <conents> SS1/path
-        // path in argv[argc-1]
-
+        // path in argv[argc-1] 
+        int sket = SS_stat[1].socket;
+        command *newcmd = malloc(sizeof(command));
+        generate_command(id, c, newcmd);
+        send_command(sket, newcmd);
+        free(newcmd);
+    }
+    if(SS_stat[2].isalive)
+    {
+        // write <conents> path -> write <conents> SS1/path
+        // path in argv[argc-1] 
+        int sket = SS_stat[2].socket;
+        command *newcmd = malloc(sizeof(command));
+        generate_command(id, c, newcmd);
+        send_command(sket, newcmd);
+        free(newcmd);
     }
 }

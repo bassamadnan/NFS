@@ -299,7 +299,7 @@ void * handle_client(void * args)
         ACK *ack  = malloc(sizeof(ACK));
         ack->code = 200;
         ack->id = 1;
-        send_ACK(socket, ack);
+        // send_ACK(socket, ack);
         free(ack);
     }
     sleep(1);
