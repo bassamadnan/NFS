@@ -36,13 +36,13 @@ void copy_command(int id, command *c)
 {
     c->client = 1;
     memset(c->cmd, 0, sizeof(c->cmd));
-    strcpy(c->cmd, "copy -d {SS_id}");
+    strcpy(c->cmd, "copy -x {SS_id}");
     c->argc = 3;
     memset(c->argv[0], 0, sizeof(c->argv[0]));
     memset(c->argv[1], 0, sizeof(c->argv[1]));
     memset(c->argv[2], 0, sizeof(c->argv[3]));
-    strcpy(c->argv[0], "create");
-    strcpy(c->argv[1], "-d");
+    strcpy(c->argv[0], "copy");
+    strcpy(c->argv[1], "-x");
     char temp[5];
     snprintf(temp, sizeof(temp), "SS%d", id);
     strcpy(c->argv[2], temp);
@@ -50,7 +50,8 @@ void copy_command(int id, command *c)
 
 void backup_SS1(int id, serverstat *SS_stat)
 {
-    int socket = SS_stat[id].socket; 
+    // int socket = SS_stat[id].socket; 
+    // send copy -x 
     // create
 }
 
@@ -74,10 +75,12 @@ void init_backup(int id, serverstat *SS_stat)
     makedir_command(id, c);
     send_command(SS_stat[1].socket, c); // ss1
     send_command(SS_stat[2].socket, c); // ss2
+    int SS1_port = SS_stat[1].port;
+    int SS2_port = SS_stat[2].port;
     SS_stat[id].backup = 1;
-    int send_bkup = 1;
-    send(SS_stat[id].backup, PARAMS(send_bkup));
-    create_backup(id, SS_stat);
+    send(SS_stat[id].socket, PARAMS(SS1_port));
+    send(SS_stat[id].socket, PARAMS(SS2_port));
+    // create_backup(id, SS_stat);
     free(c);
 }
 

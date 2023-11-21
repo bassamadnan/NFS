@@ -1,11 +1,35 @@
 #include "../inc/cmds.h"
 //#include "../inc/network.h"
+#include <dirent.h>
+#include "../inc/hash.h"
+typedef struct HashMap {
+    struct KeyValue* table[MAP_SIZE];
+} map_t;
+map_t sent_paths;
 int PERMISSIONS, ID, PORT;
 
 int stringcmp(const str s1, const str s2) {
     return !strcmp(s1, s2);
 }
+void SS_copy_command(int id,int file, str path, command *c)
+{
+    c->client = -1;
+    memset(c->cmd, 0, sizeof(c->cmd));
+    strcpy(c->cmd, "copy -x path {SS1/2}");
+    c->argc = 4;
+    memset(c->argv[0], 0, sizeof(c->argv[0]));
+    memset(c->argv[1], 0, sizeof(c->argv[1]));
+    memset(c->argv[2], 0, sizeof(c->argv[2]));
+    memset(c->argv[3], 0, sizeof(c->argv[3]));
 
+    strcpy(c->argv[0], "copy");
+    if(file) strcpy(c->argv[1], "-f");
+    else strcpy(c->argv[1], "-d");
+    strcpy(c->argv[2], path);
+    char temp[5];
+    snprintf(temp, sizeof(temp), "SS%d", id);
+    strcpy(c->argv[3], temp);
+}
 int privileged_cmd(command *c)
 {
     if(stringcmp(c->argv[0], "move") || stringcmp(c->argv[0], "copy")) return 3;
@@ -71,7 +95,7 @@ void access_path(entry * e)
     fclose(fp);
 }
 
-void SS_copy(int port, command *c)
+void SS_copy(int port, command *c, int backup)
 {
     // connect to SS listening on port 
     int network_socket;
@@ -101,12 +125,14 @@ void SS_copy(int port, command *c)
         create_command(temp_cmd, temp_path);
         send_command(network_socket, temp_cmd);
         send_file(network_socket, path);
+        if(backup) insert(&sent_paths, path, 1);
         free(temp_path);
         free(temp_cmd);
     }
     else if(stringcmp(c->argv[1], "-d"))
     {
-        send_directory(path, network_socket);
+        if(backup) send_directory_backup(path, network_socket, &sent_paths);
+        else send_directory(path, network_socket);
     }
     free(path);
     int END_CONNECTION = 2504;
@@ -141,7 +167,7 @@ void * NM_handler(void * args)
         printf("SS%d recieved command from NM in socket :%d, cmd :%s \n",ID, socket, c->cmd);
         if(stringcmp(c->argv[0], "copy") && c->client != PORT)
         {
-            SS_copy(c->client, c);
+            SS_copy(c->client, c, 0);
             free(c);
             continue;
         }
@@ -150,48 +176,18 @@ void * NM_handler(void * args)
         free(c);
     }
 }
+
+
 void send_backup(int port, entry *e)
 {
-    // send all files in e.paths to SS1
-    int network_socket;
-    network_socket = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in server_address;
-    server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = INADDR_ANY;
-    server_address.sin_port = htons(port);
-    int connection_status;
-    if(connection(&network_socket, &server_address, &connection_status))
+    for(int i=0; i<e->entries; i++)
     {
-        printf("Error in connection to server listening on port %d\n", port); return;
+        if(find(&sent_paths, e->paths[i])) continue;
+        command *c = malloc(sizeof(command));
+        SS_copy_command(ID, (1-is_directory(e->paths[i])), e->paths[i], c);
+        SS_copy(port, c, 1);
+        free(c);
     }
-    // 
-    str path = calloc(MAX_PATH_SIZE, sizeof(char));
-    command *c = malloc(sizeof(command));
-    create_command(c, path);
-    c->client = SUDOC;
-    send_command(network_socket, c);
-    strcpy(path, c->argv[2]);
-    if(stringcmp(c->argv[1], "-f"))
-    {
-        int x = MKFIL;
-        send(network_socket, PARAMS(x));
-        str temp_path = calloc(MAX_PATH_SIZE, sizeof(char));
-        // target location c->argv[3]
-        create_path(temp_path, path);
-        command *temp_cmd = malloc(sizeof(command));
-        create_command(temp_cmd, temp_path);
-        send_command(network_socket, temp_cmd);
-        send_file(network_socket, path);
-        free(temp_path);
-        free(temp_cmd);
-    }
-    else if(stringcmp(c->argv[1], "-d"))
-    {
-        send_directory(path, network_socket);
-    }
-    free(path);
-    int END_CONNECTION = 2504;
-    send(network_socket, PARAMS(END_CONNECTION));
     
 }
 int server_entry(int id, int cport, str init_path)
@@ -215,35 +211,53 @@ int server_entry(int id, int cport, str init_path)
     access_path(&e);  // read all paths from generate.txt, send it to NM
     e.permissions = PERMISSIONS;
     send_entry(network_socket, &e);
+    if(ID  <= 2) return network_socket;
     int create_bkup = 0;
-    recv(network_socket, PARAMS(create_bkup));
+    recv(network_socket, PARAMS(create_bkup)); // containts port
     if(create_bkup)
     {
-        send_backup(network_socket, &e);
+        send_backup(create_bkup, &e);
+    }
+    recv(network_socket, PARAMS(create_bkup)); // containts port
+    printf("got %d\n", create_bkup);
+    initHashMap(&sent_paths);
+    if(create_bkup)
+    {
+        send_backup(create_bkup, &e);
     }
     return network_socket;
 }
 
+void print_cmd(command *c)
+{
+    printf("argc : %d, argv[0] : %s, argv[1] : %s, argv[2] : %s, argv[3] : %s\n", c->argc, c->argv[0],c->argv[1],c->argv[2],c->argv[3]);
+}
 void handle_SS(int socket, command *cmd) // destination SS
 {
     printf("Reached inside handle_SS for SS%d for cmd %s\n", ID, cmd->argv[cmd->argc - 1]);
+    print_cmd(cmd);
     int operation = -1;
     while(1)
     {
         recv(socket, PARAMS(operation));
         if(operation == MKFIL)
         {
+            printf("Recieved makefile\n");
             command * c = malloc(sizeof(command));
             recv_command(socket, c);
+            print_cmd(c);
             char full_path[MAX_PATH_SIZE];
             memset(full_path, 0, sizeof(full_path));
             snprintf(full_path, sizeof(full_path), "%s/%s", cmd->argv[cmd->argc - 1], c->argv[c->argc-1]);
             printf("recieved file %s\n", c->argv[c->argc - 1]);
+            print_cmd(cmd);
+            printf("full_path : %s\n", full_path);
             recv_file(socket, full_path);
             free(c);
         }
         else if(operation == MKDIR)
         {
+            printf("Recieved makedir\n");
             command * server_cmd = malloc(sizeof(command));
             recv_command(socket, server_cmd);
             char full_path[MAX_PATH_SIZE];
@@ -339,6 +353,7 @@ int main(int argc, char *argv[]) {
     char path[] = "/home/bassam/Desktop/FP/Storage Server/src";
 
     // The rest of your code remains unchanged, using ID, PORT, PERMISSIONS, and IP as needed.
+    initHashMap(&sent_paths);   
     int nm_sock = server_entry(ID, PORT, path); //IP?
     pthread_t clnt, serv, nm;
     pthread_create(&serv, NULL, NM_alive, &nm_sock);

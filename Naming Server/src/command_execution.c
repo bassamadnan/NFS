@@ -1,6 +1,9 @@
 #include "../inc/command_execution.h"
 #include <dirent.h>
-
+#include "../inc/hash.h"
+typedef struct HashMap {
+    struct KeyValue* table[MAP_SIZE];
+} map_t;
 
 int is_directory(const str path) {
     DIR *directory = opendir(path);
@@ -27,7 +30,7 @@ void copyDir(int socket, str path)
 void send_directory(const str dir_path, int socket) {
    
     DIR *dir = opendir(dir_path);
-    copyDir(socket, dir_path);
+    copyDir(socket,(str) dir_path);
     if (!dir) {
         fprintf(stderr, "Failed to open directory: %s\n", dir_path);
         return;
@@ -52,6 +55,43 @@ void send_directory(const str dir_path, int socket) {
             create_command(c, full_path);
             send_command(socket, c);
             send_file(socket, full_path);
+            free(c);
+        }
+    }
+
+    closedir(dir);
+}
+void send_directory_backup(const str dir_path, int socket, map_t *sent_paths) {
+    if(find(sent_paths, dir_path)) return;
+    DIR *dir = opendir(dir_path);
+    copyDir(socket,(str) dir_path);
+    printf("reacher \n");
+    insert(sent_paths, dir_path, 1);
+    if (!dir) {
+        fprintf(stderr, "Failed to open directory: %s\n", dir_path);
+        return;
+    }
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue;  // Skip current directory and parent directory entries.
+        }
+
+        char full_path[MAX_PATH_SIZE];
+        memset(full_path, 0, sizeof(full_path));
+        snprintf(full_path, sizeof(full_path), "%s/%s", dir_path, entry->d_name);
+        printf("full_path : %s\n", full_path);
+        if (strlen(entry->d_name) && is_directory(full_path)) {
+            // create this directory
+            send_directory_backup(full_path, socket, sent_paths);  // Recursive call for subdirectories.
+        } else {
+            int operation = MKFIL;
+            send(socket, PARAMS(operation));
+            command *c = malloc(sizeof(command));
+            create_command(c, full_path);
+            send_command(socket, c);
+            send_file(socket, full_path);
+            insert(sent_paths, full_path, 1);
             free(c);
         }
     }
@@ -204,6 +244,7 @@ int executeCmd(command * cmd, int socket, int PERMISSIONS){
         char *path = cmd->argv[1];
         char *buffer = NULL;
         size_t size = 0;
+        size = size;
         int result = readFile(path, socket);
         printf("result stat %d\n", result);
         if (result == 0) {
