@@ -24,6 +24,7 @@ void trim_path(const str path)
         path++;
         i++;
     }
+    path++;
     fprintf(output_file, "%s\n", path);
 
 }

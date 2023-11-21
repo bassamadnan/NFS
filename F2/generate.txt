@@ -1,5 +1,6 @@
-/out.txt
-/testdir
-/testdir/file1.txt
-/testdir/file2.txt
-
+a
+out.txt
+testdir
+testdir/file1.txt
+testdir/file2.txt
+generate.txt
