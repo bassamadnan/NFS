@@ -150,9 +150,49 @@ void * NM_handler(void * args)
         free(c);
     }
 }
-void send_backup(int socket, entry *e)
+void send_backup(int port, entry *e)
 {
     // send all files in e.paths to SS1
+    int network_socket;
+    network_socket = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in server_address;
+    server_address.sin_family = AF_INET;
+    server_address.sin_addr.s_addr = INADDR_ANY;
+    server_address.sin_port = htons(port);
+    int connection_status;
+    if(connection(&network_socket, &server_address, &connection_status))
+    {
+        printf("Error in connection to server listening on port %d\n", port); return;
+    }
+    // 
+    str path = calloc(MAX_PATH_SIZE, sizeof(char));
+    command *c = malloc(sizeof(command));
+    create_command(c, path);
+    c->client = SUDOC;
+    send_command(network_socket, c);
+    strcpy(path, c->argv[2]);
+    if(stringcmp(c->argv[1], "-f"))
+    {
+        int x = MKFIL;
+        send(network_socket, PARAMS(x));
+        str temp_path = calloc(MAX_PATH_SIZE, sizeof(char));
+        // target location c->argv[3]
+        create_path(temp_path, path);
+        command *temp_cmd = malloc(sizeof(command));
+        create_command(temp_cmd, temp_path);
+        send_command(network_socket, temp_cmd);
+        send_file(network_socket, path);
+        free(temp_path);
+        free(temp_cmd);
+    }
+    else if(stringcmp(c->argv[1], "-d"))
+    {
+        send_directory(path, network_socket);
+    }
+    free(path);
+    int END_CONNECTION = 2504;
+    send(network_socket, PARAMS(END_CONNECTION));
+    
 }
 int server_entry(int id, int cport, str init_path)
 {

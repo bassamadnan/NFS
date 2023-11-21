@@ -199,18 +199,19 @@ void server_function(int * x)
     empty_entry(e);
     recv_entry(SS_socket, e);
     check_reconnect(e->id, SS_stat, entries);
-    if(e->id > 2)
-    {
-        create_backup(SS_stat[1].socket, SS_stat[2].socket, e->id, SS_stat);
-    }
     int i = 0;
     printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s perms: %d\n", e->id, e->entries, e->cport, e->nmport, e->ip, e->permissions);
     entries[e->id] = *e;
 
     SS_stat[e->id] = (serverstat){
         .socket = SS_socket,
-        .isalive = 1
+        .isalive = 1,
+        .port = e->cport
     };
+    if(e->id > 2)
+    {
+        init_backup(e->id, SS_stat);
+    }
     while(i<e->entries)
     {
         insert(&ID, e->paths[i], e->id);

@@ -15,9 +15,10 @@ typedef struct severstat
     int socket; // socket for the NM to communicate with this 
     int isalive;
     int backup;
+    int port;
 }serverstat;
 
 // void updateEntry();
 void check_reconnect(int id, serverstat *SS_stat, entry *e);
-void init_backup(int SS1_socket, int SS2_socket, int id, serverstat *SS_stat);
+void init_backup( int id, serverstat *SS_stat);
 //#include "hash.h"

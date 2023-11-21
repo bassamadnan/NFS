@@ -57,11 +57,11 @@ void backup_SS1(int id, serverstat *SS_stat)
 void create_backup(int id, serverstat *SS_stat)
 {
     // first create backup in SS1
-    if(SS_stat[1].isalive) backup_SS1(int id, SS_stat);    
+    if(SS_stat[1].isalive) backup_SS1(id, SS_stat);    
 
 }
 
-void init_backup(int SS1_socket, int SS2_socket, int id, serverstat *SS_stat)
+void init_backup(int id, serverstat *SS_stat)
 {
     // first time SS connects, make a directory in SS1 and SS2 
     if(SS_stat[id].backup)
@@ -72,8 +72,8 @@ void init_backup(int SS1_socket, int SS2_socket, int id, serverstat *SS_stat)
     }
     command *c = malloc(sizeof(command));
     makedir_command(id, c);
-    send_command(SS1_socket, c);
-    send_command(SS2_socket, c);
+    send_command(SS_stat[1].socket, c); // ss1
+    send_command(SS_stat[2].socket, c); // ss2
     SS_stat[id].backup = 1;
     int send_bkup = 1;
     send(SS_stat[id].backup, PARAMS(send_bkup));
