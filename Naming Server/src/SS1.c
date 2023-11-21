@@ -7,6 +7,7 @@ typedef struct HashMap {
 } map_t;
 map_t sent_paths;
 int PERMISSIONS, ID, PORT;
+entry e;
 
 int stringcmp(const str s1, const str s2) {
     return !strcmp(s1, s2);
@@ -156,6 +157,19 @@ void * NM_alive(void * args) // sends a packet every 1 second to show its still 
     close(socket);
 }
 
+void send_backup(int port, entry *e)
+{
+    for(int i=0; i<e->entries; i++)
+    {
+        if(find(&sent_paths, e->paths[i])) continue;
+        command *c = malloc(sizeof(command));
+        SS_copy_command(ID, (1-is_directory(e->paths[i])), e->paths[i], c);
+        SS_copy(port, c, 1);
+        free(c);
+    }
+    
+}
+
 void * NM_handler(void * args)
 {
     int socket = *(int *)args;
@@ -171,25 +185,18 @@ void * NM_handler(void * args)
             free(c);
             continue;
         }
+        else if(stringcmp(c->argv[0], "backup"))
+        {
+            send_backup(c->client, &e);
+            initHashMap(&sent_paths);
+            continue;
+        }
         executeCmd(c, socket, PERMISSIONS);
         printf("sent command %s\n", c->cmd);
         free(c);
     }
 }
 
-
-void send_backup(int port, entry *e)
-{
-    for(int i=0; i<e->entries; i++)
-    {
-        if(find(&sent_paths, e->paths[i])) continue;
-        command *c = malloc(sizeof(command));
-        SS_copy_command(ID, (1-is_directory(e->paths[i])), e->paths[i], c);
-        SS_copy(port, c, 1);
-        free(c);
-    }
-    
-}
 int server_entry(int id, int cport, str init_path)
 {
     int network_socket;
@@ -203,7 +210,6 @@ int server_entry(int id, int cport, str init_path)
     {
         printf("Error in connection\n"); return -1;
     }
-    entry e;
     e.id = id;
     e.cport = cport;
     strcpy(e.ip, "000.000.010.000");
@@ -217,13 +223,14 @@ int server_entry(int id, int cport, str init_path)
     if(create_bkup)
     {
         send_backup(create_bkup, &e);
+        initHashMap(&sent_paths);
     }
     recv(network_socket, PARAMS(create_bkup)); // containts port
     printf("got %d\n", create_bkup);
-    initHashMap(&sent_paths);
     if(create_bkup)
     {
         send_backup(create_bkup, &e);
+        initHashMap(&sent_paths);
     }
     return network_socket;
 }
@@ -235,7 +242,6 @@ void print_cmd(command *c)
 void handle_SS(int socket, command *cmd) // destination SS
 {
     printf("Reached inside handle_SS for SS%d for cmd %s\n", ID, cmd->argv[cmd->argc - 1]);
-    print_cmd(cmd);
     int operation = -1;
     while(1)
     {
@@ -245,12 +251,10 @@ void handle_SS(int socket, command *cmd) // destination SS
             printf("Recieved makefile\n");
             command * c = malloc(sizeof(command));
             recv_command(socket, c);
-            print_cmd(c);
             char full_path[MAX_PATH_SIZE];
             memset(full_path, 0, sizeof(full_path));
             snprintf(full_path, sizeof(full_path), "%s/%s", cmd->argv[cmd->argc - 1], c->argv[c->argc-1]);
             printf("recieved file %s\n", c->argv[c->argc - 1]);
-            print_cmd(cmd);
             printf("full_path : %s\n", full_path);
             recv_file(socket, full_path);
             free(c);

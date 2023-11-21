@@ -5,6 +5,7 @@
 #include "../inc/hash.h"
 #include "../inc/lru.h"
 
+int BKUPSS12 = 0;
 int stringcmp(const str s1, const str s2) {
     return !strcmp(s1, s2);
 }
@@ -217,7 +218,10 @@ void server_function(int * x)
     entry *e = malloc(sizeof(entry));
     empty_entry(e);
     recv_entry(SS_socket, e);
-    check_reconnect(e->id, SS_stat, entries);
+    // if (check_reconnect(e->id, SS_stat, entries))
+    // {
+
+    // }
     int i = 0;
     printf("id: %d, entries: %d,cport: %d, nmport: %d, ip %s perms: %d\n", e->id, e->entries, e->cport, e->nmport, e->ip, e->permissions);
     entries[e->id] = *e;
@@ -230,6 +234,11 @@ void server_function(int * x)
     if(e->id > 2)
     {
         init_backup(e->id, SS_stat);
+    }
+    if(e->id > 2 && (BKUPSS12 == 0))
+    {
+        BKUPSS12 = 1;
+        // init_SS12(SS_stat);
     }
     while(i<e->entries)
     {

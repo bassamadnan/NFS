@@ -4,7 +4,9 @@
 typedef struct HashMap {
     struct KeyValue* table[MAP_SIZE];
 } map_t;
-void check_reconnect(int id, serverstat *SS_stat, entry *e)
+
+// is this id reconnecting?
+int check_reconnect(int id, serverstat *SS_stat, entry *e)
 {
     if(SS_stat[id].socket != 0)
     {
@@ -14,6 +16,8 @@ void check_reconnect(int id, serverstat *SS_stat, entry *e)
     else
     {
         printf("New connection : SS%d\n", id);
+        SS_stat[id].isalive = 1;
+        SS_stat[id].socket = 0;
     }
 }
 
@@ -32,17 +36,17 @@ void makedir_command(int id, command *c)
     snprintf(temp, sizeof(temp), "SS%d", id);
     strcpy(c->argv[2], temp);
 }
-void copy_command(int id, command *c)
+void backup_command(int id, command *c)
 {
     c->client = 1;
     memset(c->cmd, 0, sizeof(c->cmd));
-    strcpy(c->cmd, "copy -x {SS_id}");
+    strcpy(c->cmd, "backup -d {SS_id}");
     c->argc = 3;
     memset(c->argv[0], 0, sizeof(c->argv[0]));
     memset(c->argv[1], 0, sizeof(c->argv[1]));
     memset(c->argv[2], 0, sizeof(c->argv[3]));
-    strcpy(c->argv[0], "copy");
-    strcpy(c->argv[1], "-x");
+    strcpy(c->argv[0], "backup");
+    strcpy(c->argv[1], "-d");
     char temp[5];
     snprintf(temp, sizeof(temp), "SS%d", id);
     strcpy(c->argv[2], temp);
@@ -50,11 +54,43 @@ void copy_command(int id, command *c)
 
 void backup_SS1(int id, serverstat *SS_stat)
 {
-    // int socket = SS_stat[id].socket; 
-    // send copy -x 
-    // create
+    // backup SS1 into SSid
+    if(SS_stat[id].isalive == 0) return;
+    command *c = malloc(sizeof(command));
+    makedir_command(1, c);
+    send_command(SS_stat[id].socket, c);
+    free(c);
+    command *c1 = malloc(sizeof(command));
+    backup_command(1, c1);
+    c1->client = SS_stat[id].port;
+    send_command(SS_stat[id].socket, c1);
+    free(c1);
 }
 
+void backup_SS2(int id, serverstat *SS_stat)
+{
+    if(SS_stat[id].isalive == 0) return;
+    command *c = malloc(sizeof(command));
+    makedir_command(2, c);
+    send_command(SS_stat[id].socket, c);
+    free(c);
+    command *c1 = malloc(sizeof(command));
+    backup_command(2, c1);
+    c1->client = SS_stat[id].port;
+    send_command(SS_stat[id].socket, c1);
+    free(c1);
+}
+void init_SS12(serverstat *SS_stat)
+{
+    backup_SS1(2, SS_stat);
+    sleep(4);
+    backup_SS1(3, SS_stat);
+    sleep(3);
+    backup_SS2(1, SS_stat);
+    sleep(4);
+    backup_SS2(3, SS_stat);
+    sleep(3);
+}
 void create_backup(int id, serverstat *SS_stat)
 {
     // first create backup in SS1
@@ -90,4 +126,30 @@ void create_copy(int SS1_socket, int SS2_socket, int id, entry *e)
 {
     // e[]
 
+}
+
+void generate_command(int id, command *c1, command *c2)
+{
+    c2->argc = c1->argc;
+    c2->client = c2->client;
+    memset(c2->cmd, 0, sizeof(c2->cmd));
+    for(int i=0; i<c1->argc; i++)
+    {
+        memset(c2->argv[i], 0, sizeof(c2->argv[i]));
+        strcpy(c2->argv[i], c1->argv[i]);
+    }
+    memset(c2->argv[c2->argc - 1], 0, sizeof(c2->argv[c2->argc - 1]));
+    
+    snprintf(c2->argv[c2->argc - 1], "SS%d/%s", id, c1->argv[c1->argc - 1]);
+}
+
+void exec_backup(int id, serverstat *SS_stat , command *c)
+{
+    // execute the same command on backup
+    if(SS_stat[1].isalive)
+    {
+        // write <conents> path -> write <conents> SS1/path
+        // path in argv[argc-1]
+
+    }
 }
